@@ -5,7 +5,11 @@ import { assertAuthEnvironment, auth } from "@/lib/auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const backendBaseUrl = (process.env.AGENTLENS_API_URL || "http://localhost:8001").replace(/\/$/, "");
+const backendBaseUrl = (
+  process.env.AGENTLENS_API_URL
+  || (process.env.AGENTLENS_API_HOSTPORT ? `http://${process.env.AGENTLENS_API_HOSTPORT}` : undefined)
+  || "http://localhost:8001"
+).replace(/\/$/, "");
 
 function backendPath(path: string[], search: URLSearchParams): string | null {
   const joined = path.join("/");

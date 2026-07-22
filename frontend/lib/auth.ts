@@ -48,7 +48,7 @@ async function sendPasswordReset({
 
 export const auth = betterAuth({
   appName: "AgentLens",
-  baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+  baseURL: process.env.BETTER_AUTH_URL || process.env.RENDER_EXTERNAL_URL || "http://localhost:3000",
   // This placeholder prevents Next's build-time route analysis from invoking
   // Better Auth's unsafe default secret. assertAuthEnvironment() rejects it at
   // runtime in production before an auth request is served.

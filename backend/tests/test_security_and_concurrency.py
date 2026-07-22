@@ -117,4 +117,8 @@ def test_concurrent_pooled_writes_keep_each_projects_statistics_isolated():
 
     assert len({project["project_id"] for project, _ in results}) == project_count
     for project, stats in results:
-        assert stats == {"total_calls": events_per_project, "success_rate": 100.0, "total_cost_usd": 0.0}, project["project_id"]
+        assert stats["total_calls"] == events_per_project, project["project_id"]
+        assert stats["successful_calls"] == events_per_project, project["project_id"]
+        assert stats["failed_calls"] == 0, project["project_id"]
+        assert stats["success_rate"] == 100.0, project["project_id"]
+        assert stats["total_cost_usd"] == 0.0, project["project_id"]

@@ -106,6 +106,7 @@ async def request_logging(request: Request, call_next):
 class ProjectIn(BaseModel):
     name: str = Field(min_length=1, max_length=200)
     webhook_url: str | None = Field(default=None, max_length=2048)
+    technology: Literal["nextjs", "node", "express", "fastapi", "django", "laravel", "python", "other"] = "other"
 
 
 def error_category_for_status(status_code: int | None) -> str | None:
@@ -273,6 +274,7 @@ def make_account_project(
         settings.rate_limit_capacity,
         owner_account_id=account_id,
         webhook_url=payload.webhook_url,
+        technology=payload.technology,
     )
 
 
@@ -282,6 +284,7 @@ def account_project(project: Annotated[Project, Depends(require_owned_project)])
         "project_id": project.id,
         "name": project.name,
         "webhook_configured": bool(project.webhook_url),
+        "technology": project.technology,
         "created_at": project.created_at,
     }
 

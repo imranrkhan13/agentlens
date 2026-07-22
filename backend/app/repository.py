@@ -46,6 +46,7 @@ def create_project(
     *,
     owner_account_id: str | None = None,
     webhook_url: str | None = None,
+    technology: str = "other",
 ) -> dict[str, str]:
     # UUID collision is extraordinarily unlikely.  The small retry guards the
     # unique constraint rather than ever handing two tenants the same identity.
@@ -58,6 +59,7 @@ def create_project(
             api_key_hash=hash_api_key(api_key, pepper),
             owner_account_id=owner_account_id,
             webhook_url=webhook_url,
+            technology=technology,
         )
         session.add(project)
         try:
@@ -66,7 +68,7 @@ def create_project(
             session.flush()
             session.add(ApiRateLimit(project_id=project_id, tokens=capacity, updated_at=datetime.now(timezone.utc)))
             session.commit()
-            return {"project_id": project_id, "api_key": api_key, "name": name}
+            return {"project_id": project_id, "api_key": api_key, "name": name, "technology": technology}
         except IntegrityError:
             session.rollback()
     raise RuntimeError("Could not allocate a unique project identity.")
@@ -89,6 +91,7 @@ def list_owned_projects(session: Session, account_id: str) -> list[dict[str, obj
             "project_id": project.id,
             "name": project.name,
             "webhook_configured": bool(project.webhook_url),
+            "technology": project.technology,
             "created_at": project.created_at,
         }
         for project in projects
@@ -173,22 +176,48 @@ def insert_event(
     session.commit()
 
 
-def get_stats(session: Session, project_id: str) -> dict[str, float | int | None]:
-    """Return aggregate telemetry for exactly one project, never globally."""
+def get_stats(session: Session, project_id: str) -> dict[str, object]:
+    """Return plain-language dashboard aggregates for exactly one project.
+
+    The field names remain API-friendly, but every value is computed from
+    events that actually belong to ``project_id``.  The dashboard can use this
+    single response for a founder-friendly summary without manufacturing
+    telemetry client-side.
+    """
     row = session.execute(
         select(
             func.count(Event.id),
             func.coalesce(func.sum(case((Event.success.is_(True), 1), else_=0)), 0),
             func.coalesce(func.sum(Event.est_cost_usd), 0),
+            func.avg(Event.latency_ms),
+            func.coalesce(func.sum(Event.retry_count), 0),
+            func.count(func.distinct(Event.provider)),
+            func.max(Event.created_at),
         ).where(Event.project_id == project_id)
     ).one()
     total, successes, cost = int(row[0]), int(row[1]), float(row[2])
     if total == 0:
-        return {"total_calls": 0, "success_rate": None, "total_cost_usd": 0}
+        return {
+            "total_calls": 0,
+            "successful_calls": 0,
+            "failed_calls": 0,
+            "success_rate": None,
+            "total_cost_usd": 0,
+            "avg_latency_ms": None,
+            "total_retries": 0,
+            "detected_provider_count": 0,
+            "latest_event_at": None,
+        }
     return {
         "total_calls": total,
+        "successful_calls": successes,
+        "failed_calls": total - successes,
         "success_rate": round(successes / total * 100, 1),
         "total_cost_usd": round(cost, 4),
+        "avg_latency_ms": round(float(row[3]), 1),
+        "total_retries": int(row[4]),
+        "detected_provider_count": int(row[5]),
+        "latest_event_at": row[6],
     }
 
 

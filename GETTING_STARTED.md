@@ -61,7 +61,7 @@ Expected output:
 
 ```json
 {"ok":true}
-{"total_calls":1,"success_rate":100.0,"total_cost_usd":0.0}
+{"total_calls":1,"successful_calls":1,"failed_calls":0,"success_rate":100.0,"total_cost_usd":0.0,"avg_latency_ms":320.0,"total_retries":0,"detected_provider_count":1,"latest_event_at":"..."}
 ```
 
 Every project gets a unique key. The API derives the project from that key;

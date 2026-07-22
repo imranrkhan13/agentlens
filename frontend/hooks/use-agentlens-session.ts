@@ -40,6 +40,7 @@ export function useAgentLensSession() {
       projectId: active.project_id,
       projectName: active.name,
       webhookConfigured: active.webhook_configured,
+      technology: active.technology,
       createdAt: active.created_at,
     } : null);
   }, [projects, selectedProjectId]);

@@ -1,24 +1,32 @@
 {
   "name": "agentlens",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Privacy-safe telemetry for AgentLens.",
   "keywords": ["ai", "telemetry", "observability", "llm", "agentlens"],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "agentlens": "./bin/agentlens.mjs"
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.cjs",
       "types": "./dist/index.d.ts"
+    },
+    "./register": {
+      "import": "./dist/register.js",
+      "require": "./dist/register.cjs",
+      "types": "./dist/register.d.ts"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "bin", "README.md"],
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.esm.json",
-    "test": "npm run build && node ./tests/telemetry-enrichment.test.mjs",
+    "test": "npm run build && node ./tests/telemetry-enrichment.test.mjs && node ./tests/register.test.mjs && node ./tests/cli.test.mjs",
     "verify:local": "node ./examples/local-verify.mjs",
     "prepack": "npm run build"
   },

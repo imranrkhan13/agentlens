@@ -23,6 +23,8 @@ client → stateless FastAPI replicas → pooled PostgreSQL connections → Post
 Start with [GETTING_STARTED.md](GETTING_STARTED.md). For legacy deployments,
 use [the SQLite migration guide](docs/MIGRATING_FROM_SQLITE.md).
 
+For a GitHub-to-hosted deployment, follow [the Render deployment guide](docs/DEPLOY_ON_RENDER.md).
+
 ## Local website and dashboard
 
 The frontend owns the marketing landing page, authentication, and the product

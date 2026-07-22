@@ -1,0 +1,57 @@
+# One-click Render deployment for the AgentLens website, API, and PostgreSQL.
+# Secrets are generated or requested by Render; never commit real values here.
+services:
+  - type: web
+    name: agentlens-api
+    runtime: docker
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    dockerContext: backend
+    healthCheckPath: /health
+    envVars:
+      - key: AGENTLENS_DATABASE_URL
+        fromDatabase:
+          name: agentlens-db
+          property: connectionString
+      - key: AGENTLENS_API_KEY_PEPPER
+        generateValue: true
+      - key: AGENTLENS_INTERNAL_API_TOKEN
+        generateValue: true
+      - key: AGENTLENS_ENV
+        value: production
+      # Enter a temporary value for the first deploy, then replace it with the
+      # website URL Render gives you. See docs/DEPLOY_ON_RENDER.md.
+      - key: AGENTLENS_CORS_ORIGINS
+        sync: false
+      - key: AGENTLENS_CORS_ALLOW_CREDENTIALS
+        value: "false"
+
+  - type: web
+    name: agentlens-web
+    runtime: docker
+    plan: free
+    dockerfilePath: frontend/Dockerfile
+    dockerContext: frontend
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: agentlens-db
+          property: connectionString
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: AGENTLENS_API_HOSTPORT
+        fromService:
+          type: web
+          name: agentlens-api
+          property: hostport
+      - key: AGENTLENS_INTERNAL_API_TOKEN
+        fromService:
+          type: web
+          name: agentlens-api
+          envVarKey: AGENTLENS_INTERNAL_API_TOKEN
+
+databases:
+  - name: agentlens-db
+    plan: free
+    databaseName: agentlens
+    user: agentlens

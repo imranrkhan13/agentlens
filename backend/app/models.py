@@ -49,6 +49,7 @@ class Project(Base):
         ForeignKey("accounts.id", ondelete="CASCADE"), nullable=True, index=True
     )
     webhook_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    technology: Mapped[str] = mapped_column(String(32), nullable=False, server_default="other")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 

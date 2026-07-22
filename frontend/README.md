@@ -53,8 +53,14 @@ The UI reads `GET /v1/stats`, `GET /v1/events`, and `GET /v1/providers` for the 
 
 The publishable universal TypeScript SDK is in `packages/agentlens`; the Python source remains in `sdk/python`. Do not place a project ingestion key in browser code while testing either package.
 
+For supported server-side OpenAI, Anthropic, Gemini, OpenRouter, Mistral, Groq, and Ollama `fetch` calls, add `AGENTLENS_API_KEY` to the server environment, install `agentlens`, and import `agentlens/register` once at server startup. This keeps existing provider calls unchanged while sending metadata-only telemetry. Custom providers use the explicit `agentlens.track(...)` fallback shown in the project setup screen.
+
 Set `NEXT_PUBLIC_AGENTLENS_API_URL` to the deployed API URL when hosting the app.
 
 ## Diagnosing connections
 
 Open **Diagnostics** in the app to test any backend URL. The test checks URL format, `GET /health`, `GET /openapi.json`, and the advertised AgentLens endpoints. It records the real HTTP status, response body, request ID (when exposed), browser error, timing, CORS context, and recovery steps instead of showing a generic request error.
+
+## Deploy from GitHub
+
+The repository includes a Render Blueprint that creates the website, API, and PostgreSQL database together. Follow [the Render deployment guide](../docs/DEPLOY_ON_RENDER.md) after pushing the repository to GitHub.

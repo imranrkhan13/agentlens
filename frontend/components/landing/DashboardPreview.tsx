@@ -57,15 +57,17 @@ export function DashboardPreview() {
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-[12px] font-medium text-muted">Latency — last 60 min</span>
+                <span className="text-[12px] font-medium text-muted">Typical response time — last hour</span>
                 <span className="text-[11px] text-subtle">gpt-4o</span>
               </div>
               <Sparkline />
-              <div className="mt-4 grid grid-cols-3 gap-3">
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
                 {[
-                  { label: "Requests", value: "12,402" },
-                  { label: "Success rate", value: "94.2%" },
-                  { label: "P95 latency", value: "410ms" },
+                  { label: "AI Conversations", value: "12,402" },
+                  { label: "Answers Delivered", value: "94.2%" },
+                  { label: "Typical Response Time", value: "⚡ Very Fast" },
+                  { label: "AI Spend", value: "$12.40" },
+                  { label: "Needs Attention", value: "3" },
                 ].map((m) => (
                   <div key={m.label} className="rounded-xl bg-white/[0.03] p-3">
                     <div className="text-[11px] text-subtle">{m.label}</div>
@@ -80,12 +82,12 @@ export function DashboardPreview() {
                 <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium text-bad">
                   <Bell size={11} /> New alert
                 </div>
-                <div className="text-[12.5px] leading-relaxed text-ink">OpenAI latency up 180% in the last 6 minutes.</div>
+                <div className="text-[12.5px] leading-relaxed text-ink">OpenAI is taking longer than usual right now.</div>
               </div>
               {[
-                { name: "OpenAI", status: "Degraded", color: "text-warn" },
-                { name: "Claude", status: "Healthy", color: "text-good" },
-                { name: "Groq", status: "Healthy", color: "text-good" },
+                { name: "OpenAI", status: "Needs attention", color: "text-warn" },
+                { name: "Anthropic Claude", status: "Working well", color: "text-good" },
+                { name: "Groq", status: "Working well", color: "text-good" },
               ].map((p) => (
                 <div key={p.name} className="flex items-center justify-between rounded-xl bg-white/[0.03] px-4 py-3">
                   <span className="text-[13px] text-ink">{p.name}</span>

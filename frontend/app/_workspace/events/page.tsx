@@ -16,18 +16,13 @@ export default function EventsPage() {
   const { session, isReady } = useAgentLensSession();
   const verified = isConnectionVerified(session);
   const enabled = Boolean(session && isReady && verified);
-  const events = useQuery({ queryKey: ["events", session?.projectId, "history"], queryFn: () => agentLensApi.getEvents(session!.projectId, 100), enabled, refetchInterval: enabled ? 15000 : false });
+  const events = useQuery({ queryKey: ["events", session?.projectId, "history"], queryFn: () => agentLensApi.getEvents(session!.projectId, 100), enabled, refetchInterval: enabled ? 15_000 : false });
 
-  return <div className="space-y-7"><PageHeader eyebrow="Telemetry" title="Events" description="A project-scoped, searchable history of telemetry that has actually arrived." />
+  return <div className="space-y-7"><PageHeader eyebrow="Your AI app" title="Activity" description="A simple history of what your AI did and whether it answered." />
     {!verified && <ConnectionCallout needsVerification={Boolean(session)} />}
     {events.isError && isAgentLensApiError(events.error) && <RequestDiagnosticsCard diagnostic={events.error.diagnostic} />}
     <RecentEvents events={events.data?.events || []} hasSession={verified} isLoading={events.isLoading} />
-    <section className="surface rounded-2xl p-5 sm:p-6"><div className="flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl border border-violet/20 bg-violet/[.08] text-violet"><Activity className="size-4" /></span><div><h2 className="text-sm font-medium text-[#eeedf4]">Generic telemetry works for every provider</h2><p className="mt-1 text-xs leading-5 text-[#7e7d8c]">Use a native adapter where available, or report a custom provider explicitly. AgentLens never reads prompt content to guess the provider.</p><div className="mt-4"><CodeSnippet>{`agentlens.track({
-  provider: "custom-provider", model: "model-name",
-  latencyMs, success, statusCode,
-  inputTokens, outputTokens, estimatedCost,
-  errorCategory
-})`}</CodeSnippet></div></div></div></section>
-    <div className="flex gap-3 rounded-2xl border border-warning/15 bg-warning/[.045] p-4 text-xs leading-5 text-[#b6aa7d]"><ShieldAlert className="mt-0.5 size-4 shrink-0 text-warning" /> Telemetry reads are authenticated and scoped to the connected project. Event payloads contain metadata only; prompts, completions, credentials, and request bodies are not accepted by this API.</div>
+    <details className="surface rounded-2xl p-5 sm:p-6"><summary className="cursor-pointer text-sm font-medium text-[#eeedf4]">Advanced</summary><div className="mt-4 flex items-start gap-3"><span className="grid size-9 shrink-0 place-items-center rounded-xl border border-violet/20 bg-violet/[.08] text-violet"><Activity className="size-4" /></span><div><p className="text-xs leading-5 text-[#7e7d8c]">If you use a custom AI service, your developer can share its activity with this small extra call. Your prompts and private keys are not included.</p><div className="mt-4"><CodeSnippet>{'agentlens.track({\\n  provider: "custom-ai-service", model: "model-name",\\n  latencyMs, success, statusCode\\n})'}</CodeSnippet></div></div></div></details>
+    <div className="flex gap-3 rounded-2xl border border-warning/15 bg-warning/[.045] p-4 text-xs leading-5 text-[#b6aa7d]"><ShieldAlert className="mt-0.5 size-4 shrink-0 text-warning" /> We show activity details, not your customers&apos; messages, passwords, or private keys.</div>
   </div>;
 }

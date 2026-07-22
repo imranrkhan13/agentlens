@@ -2,12 +2,16 @@ export type Project = {
   project_id: string;
   name: string;
   api_key: string;
+  technology: ProjectTechnology;
 };
+
+export type ProjectTechnology = "nextjs" | "node" | "express" | "fastapi" | "django" | "laravel" | "python" | "other";
 
 export type ProjectSummary = {
   project_id: string;
   name: string;
   webhook_configured: boolean;
+  technology: ProjectTechnology;
   created_at: string;
 };
 
@@ -17,8 +21,14 @@ export type ProjectsResponse = {
 
 export type Stats = {
   total_calls: number;
+  successful_calls: number;
+  failed_calls: number;
   success_rate: number | null;
   total_cost_usd: number;
+  avg_latency_ms: number | null;
+  total_retries: number;
+  detected_provider_count: number;
+  latest_event_at: string | null;
 };
 
 export type TelemetryEvent = {
@@ -82,11 +92,13 @@ export type ProvidersResponse = {
 export type CreateProjectInput = {
   name: string;
   webhook_url?: string;
+  technology: ProjectTechnology;
 };
 
 export type SessionConfig = {
   projectId: string;
   projectName: string;
   webhookConfigured: boolean;
+  technology: ProjectTechnology;
   createdAt: string;
 };

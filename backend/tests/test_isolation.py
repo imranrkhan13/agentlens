@@ -19,7 +19,7 @@ def make_project(client: TestClient, name: str, account_id: str | None = None) -
         )
     response = client.post(
         "/v1/account/projects",
-        json={"name": name},
+        json={"name": name, "technology": "nextjs"},
         headers={"x-agentlens-account-id": account_id, "x-agentlens-internal-token": "test-only-internal-token-not-for-production"},
     )
     assert response.status_code == 201, response.text
@@ -41,6 +41,7 @@ def test_two_projects_only_see_their_own_real_traffic(client):
 
     assert alice["api_key"] != bob["api_key"]
     assert alice["project_id"] != bob["project_id"]
+    assert alice["technology"] == "nextjs"
 
     for _ in range(10):
         send_event(client, alice["api_key"], True)
@@ -51,8 +52,22 @@ def test_two_projects_only_see_their_own_real_traffic(client):
     bob_stats = client.get("/v1/stats", headers={"x-api-key": bob["api_key"]})
     assert alice_stats.status_code == 200
     assert bob_stats.status_code == 200
-    assert alice_stats.json() == {"total_calls": 10, "success_rate": 100.0, "total_cost_usd": 0.0}
-    assert bob_stats.json() == {"total_calls": 3, "success_rate": 0.0, "total_cost_usd": 0.0}
+    alice_data = alice_stats.json()
+    bob_data = bob_stats.json()
+    assert alice_data["total_calls"] == 10
+    assert alice_data["successful_calls"] == 10
+    assert alice_data["failed_calls"] == 0
+    assert alice_data["success_rate"] == 100.0
+    assert alice_data["total_cost_usd"] == 0.0
+    assert alice_data["detected_provider_count"] == 1
+    assert alice_data["latest_event_at"] is not None
+    assert bob_data["total_calls"] == 3
+    assert bob_data["successful_calls"] == 0
+    assert bob_data["failed_calls"] == 3
+    assert bob_data["success_rate"] == 0.0
+    assert bob_data["total_cost_usd"] == 0.0
+    assert bob_data["detected_provider_count"] == 1
+    assert bob_data["latest_event_at"] is not None
 
     invalid = client.get("/v1/stats", headers={"x-api-key": "al_totally_made_up_key"})
     assert invalid.status_code == 401
@@ -71,6 +86,7 @@ def test_account_project_management_never_lists_another_accounts_project(client)
     alice_list = client.get("/v1/account/projects", headers=alice_headers)
     assert alice_list.status_code == 200
     assert [project["project_id"] for project in alice_list.json()["projects"]] == [alice["project_id"]]
+    assert alice_list.json()["projects"][0]["technology"] == "nextjs"
 
     forbidden = client.get(f"/v1/account/projects/{alice['project_id']}/stats", headers=bob_headers)
     assert forbidden.status_code == 404

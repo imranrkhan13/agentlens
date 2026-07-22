@@ -4,13 +4,26 @@ Privacy-safe telemetry for any AI provider. AgentLens records only the metadata
 you pass to `track`: it does not collect prompts, completions, request bodies,
 authorization headers, or API keys.
 
-## Install
+## Install in one command
+
+Create a project in AgentLens first, then open a terminal in your app folder:
 
 ```bash
-npm install agentlens
+npx agentlens init
 ```
 
-## Use it on your server
+The guided setup asks for your private project key, detects a supported app,
+installs AgentLens, adds the registration it needs, writes a local config, and
+checks its work. Your normal supported AI calls stay unchanged.
+
+It supports Next.js, Node.js, Express, FastAPI, Django, and Python apps. For a
+remote AgentLens service, enter its API address when asked. The default is
+`http://localhost:8001`.
+
+Your project key is stored in an environment file and is never printed by the
+CLI. Do not commit that file or use the key in browser code.
+
+## Manual setup and custom AI services
 
 ```ts
 import agentlens from "agentlens";
@@ -70,9 +83,10 @@ In either case the SDK emits:
 [AgentLens] Browser mode enabled. Do not use ingestion keys in production.
 ```
 
-## Automatic provider telemetry
+## Automatic AI-service activity
 
-`init` automatically observes `fetch` calls to supported provider API hosts:
+`init` (and the simpler `agentlens/register` import) automatically observes
+`fetch` calls to supported provider API hosts:
 OpenAI, Anthropic, Gemini, OpenRouter, Mistral, Groq, and Ollama. Existing
 calls continue to use the same URL and request body; AgentLens sends a separate
 metadata-only event after the provider request completes.

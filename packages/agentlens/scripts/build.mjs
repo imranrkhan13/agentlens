@@ -32,10 +32,15 @@ try {
   copyBuildOutput(resolve(buildRoot, "esm/index.js"), resolve(distRoot, "index.js"));
   copyBuildOutput(resolve(buildRoot, "cjs/index.js"), resolve(distRoot, "index.cjs"));
   copyBuildOutput(resolve(buildRoot, "types/index.d.ts"), resolve(distRoot, "index.d.ts"));
+  copyBuildOutput(resolve(buildRoot, "esm/register.js"), resolve(distRoot, "register.js"));
+  copyBuildOutput(resolve(buildRoot, "cjs/register.js"), resolve(distRoot, "register.cjs"));
+  copyBuildOutput(resolve(buildRoot, "types/register.d.ts"), resolve(distRoot, "register.d.ts"));
   copyBuildOutput(resolve(buildRoot, "esm/provider-inference.js"), resolve(distRoot, "provider-inference.js"));
   copyBuildOutput(resolve(buildRoot, "cjs/provider-inference.js"), resolve(distRoot, "provider-inference.cjs"));
   const commonJsEntry = resolve(distRoot, "index.cjs");
   writeFileSync(commonJsEntry, readFileSync(commonJsEntry, "utf8").replaceAll("./provider-inference.js", "./provider-inference.cjs"));
+  const commonJsRegister = resolve(distRoot, "register.cjs");
+  writeFileSync(commonJsRegister, readFileSync(commonJsRegister, "utf8").replaceAll("./index.js", "./index.cjs"));
 } finally {
   rmSync(buildRoot, { recursive: true, force: true });
 }
