@@ -9,8 +9,10 @@ export function PageHeader({ eyebrow, title, description, action, helpText }: { 
       <div>
         {eyebrow && <span className="eyebrow mb-3">{eyebrow}</span>}
         <h1 className="text-2xl font-semibold tracking-[-.035em] text-[#f5f4fa] sm:text-[28px]">{title}</h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#8f8e9e]">{description}</p>
-        <div className="mt-3"><FounderHelp message={helpText} /></div>
+        <div className="mt-2 flex max-w-2xl items-start gap-2">
+          <p className="text-sm leading-6 text-[#8f8e9e]">{description}</p>
+          <span className="mt-1 shrink-0"><FounderHelp message={helpText} /></span>
+        </div>
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </motion.div>
