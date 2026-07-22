@@ -165,32 +165,32 @@ export function backendUrlGuidance(value: string): BackendUrlGuidance {
   if (!validation.valid) return {
     kind: "unknown",
     host: null,
-    title: "Enter an API service URL",
-    description: "Use the root URL of the service running FastAPI, including https:// or http://.",
-    steps: ["For Docker on this computer, use http://localhost:8001.", "For a hosted API, use the service URL from Render, Railway, Fly, or your API domain."],
+    title: "Enter an AgentLens service address",
+    description: "Use the main address for AgentLens, including https:// or http://.",
+    steps: ["For AgentLens on this computer, use http://localhost:8001.", "For a hosted service, use the address from Render, Railway, Fly, or your domain."],
   };
 
   const host = new URL(validation.normalized).hostname;
   if (host.endsWith(".netlify.app") || host.endsWith(".vercel.app") || host.endsWith(".github.io")) return {
     kind: "frontend_host",
     host,
-    title: "This looks like a frontend hosting URL",
-    description: `${host} matches a frontend-hosting domain. It can be an API only when it explicitly proxies /health, /openapi.json, and /v1/* to a FastAPI service.`,
-    steps: ["Deploy the FastAPI backend as a web service (for example on Render or Railway).", "Set AGENTLENS_CORS_ORIGINS to this dashboard's origin on that service.", "Paste the backend service root here—not the Netlify or Vercel frontend URL."],
+    title: "This looks like a website address",
+    description: `${host} looks like a public website. It may not be the address for your AgentLens service.`,
+    steps: ["Use the separate address for your AgentLens service.", "Ask your developer to allow this dashboard address.", "Paste the AgentLens service address here—not the Netlify or Vercel website address."],
   };
   if (host === "localhost" || host === "127.0.0.1") return {
     kind: "local",
     host,
-    title: "Local AgentLens backend",
-    description: "This is the expected setup while the frontend and Docker API run on the same computer.",
-    steps: ["Start the API with docker compose up -d api.", "Keep AGENTLENS_CORS_ORIGINS set to the exact dashboard origin.", "Run the connection test before adding or reusing a key."],
+    title: "AgentLens on this computer",
+    description: "This is the usual address while AgentLens is running on the same computer.",
+    steps: ["Start AgentLens with your usual local command.", "Make sure this dashboard address is allowed.", "Run this check before continuing."],
   };
   return {
     kind: "hosted",
     host,
-    title: "Hosted backend candidate",
-    description: "We will verify that this host exposes the AgentLens health check and OpenAPI contract before treating it as connected.",
-    steps: ["The service must expose /health and /openapi.json.", "Set AGENTLENS_CORS_ORIGINS to the exact dashboard origin.", "Use this service root without /v1/stats or another endpoint suffix."],
+    title: "Hosted AgentLens service",
+    description: "We will check that this address can work with your AgentLens dashboard.",
+    steps: ["Use the main AgentLens service address.", "Make sure this dashboard address is allowed.", "Do not add extra paths after the main address."],
   };
 }
 

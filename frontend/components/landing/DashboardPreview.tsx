@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bell } from "lucide-react";
+import { Bell, Zap } from "lucide-react";
 import { Reveal } from "./Reveal";
 import { Card, SectionLabel } from "@/components/landing/ui/card";
 
@@ -65,13 +65,13 @@ export function DashboardPreview() {
                 {[
                   { label: "AI Conversations", value: "12,402" },
                   { label: "Answers Delivered", value: "94.2%" },
-                  { label: "Typical Response Time", value: "⚡ Very Fast" },
+                  { label: "Typical Response Time", value: "Very Fast", icon: Zap },
                   { label: "AI Spend", value: "$12.40" },
                   { label: "Needs Attention", value: "3" },
                 ].map((m) => (
                   <div key={m.label} className="rounded-xl bg-white/[0.03] p-3">
                     <div className="text-[11px] text-subtle">{m.label}</div>
-                    <div className="text-[16px] font-semibold tabular-nums text-ink">{m.value}</div>
+                    <div className="flex items-center gap-1 text-[16px] font-semibold tabular-nums text-ink">{m.icon && <m.icon className="size-3.5 text-violet" aria-hidden="true" />}{m.value}</div>
                   </div>
                 ))}
               </div>

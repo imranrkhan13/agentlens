@@ -9,7 +9,7 @@ import { Card, SectionLabel } from "@/components/landing/ui/card";
 // Clearly generic role attributions, per early-access-stage convention.
 const QUOTES = [
   {
-    quote: "We found out about a provider degradation from AgentLens before a single customer complained. That's the whole pitch, and it delivered.",
+    quote: "We found out one of our AI services was struggling before a single customer complained. That's the whole pitch, and it delivered.",
     role: "Engineering Lead, early access",
   },
   {
@@ -17,7 +17,7 @@ const QUOTES = [
     role: "Staff Engineer, early access",
   },
   {
-    quote: "Switching providers used to be a guess. Now it's a number we can actually trust, from our own traffic.",
+    quote: "Switching AI services used to be a guess. Now it's a number we can actually trust, from our own activity.",
     role: "Founder, early access",
   },
 ];

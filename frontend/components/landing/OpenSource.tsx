@@ -6,7 +6,7 @@ import { Reveal } from "./Reveal";
 import { Card, SectionLabel } from "@/components/landing/ui/card";
 import { Button } from "@/components/landing/ui/button";
 
-const SDKS = [
+const TOOLS = [
   { name: "Python", detail: "OpenAI, Anthropic, Groq" },
   { name: "TypeScript", detail: "OpenAI, Anthropic" },
 ];
@@ -18,13 +18,13 @@ export function OpenSource() {
         <Card strong className="overflow-hidden p-10 text-center sm:p-14">
           <SectionLabel>Open source</SectionLabel>
           <h2 className="mx-auto mb-6 max-w-lg text-[28px] font-semibold tracking-tight text-ink sm:text-[36px]">
-            The SDKs are open. So is the reasoning behind every alert.
+            The tools are open. So is the reasoning behind every alert.
           </h2>
           <p className="mx-auto mb-8 max-w-md text-[14px] text-muted">
-            No hosted LLM behind incident explanations, no black-box scoring — every recommendation traces back to real telemetry you can inspect yourself.
+            No black-box scoring — every recommendation traces back to real activity you can inspect yourself.
           </p>
           <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
-            {SDKS.map((sdk) => (
+            {TOOLS.map((sdk) => (
               <div key={sdk.name} className="flex items-center gap-2 rounded-full border border-line px-4 py-2 text-[12.5px]">
                 <FileCode2 size={13} className="text-accent" />
                 <span className="font-medium text-ink">{sdk.name}</span>

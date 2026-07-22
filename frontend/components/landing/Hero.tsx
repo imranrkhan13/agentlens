@@ -169,7 +169,7 @@ export function Hero() {
 
           {/* Mini timeline */}
           <div className="mb-6 flex items-center gap-0">
-            {["Deploy", "Latency spike", "Retries", "Alert fired", "Investigating"].map((label, i, arr) => (
+            {["Change made", "Slow replies", "Tried again", "Alert sent", "Checking"].map((label, i, arr) => (
               <div key={label} className="flex flex-1 items-center">
                 <div className="flex flex-col items-center gap-1.5">
                   <motion.span
@@ -185,7 +185,7 @@ export function Hero() {
             ))}
           </div>
 
-          {/* Provider health mini rings */}
+          {/* AI service mini rings */}
           <div className="grid grid-cols-3 gap-3">
             {[
               { name: "OpenAI", score: 61, color: "#F87171" },

@@ -6,8 +6,8 @@ import { Reveal } from "./Reveal";
 import { SectionLabel } from "@/components/landing/ui/card";
 
 const STEPS = [
-  { icon: Download, title: "Install SDK", body: "One line. No rewrite." },
-  { icon: Radio, title: "Telemetry", body: "Real calls, watched silently." },
+  { icon: Download, title: "Connect", body: "One guided command. No rewrite." },
+  { icon: Radio, title: "Activity", body: "Your real AI use appears here." },
   { icon: Search, title: "Detection", body: "Deviation from your own baseline." },
   { icon: FileSearch, title: "Root cause", body: "Why it happened, in plain English." },
   { icon: Sparkles, title: "Investigation prompt", body: "Ready to paste into Claude." },

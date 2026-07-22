@@ -8,12 +8,12 @@ import { Reveal } from "./Reveal";
 import { SectionLabel } from "@/components/landing/ui/card";
 
 const FEATURES = [
-  { icon: Terminal, title: "One-line SDK", body: "agentlens.init() and every call site is instrumented automatically." },
+  { icon: Terminal, title: "Connect in one step", body: "A short guided setup keeps your normal AI calls unchanged." },
   { icon: Activity, title: "Incident timeline", body: "First seen, last seen, resolution — the full story of every anomaly." },
   { icon: Sparkles, title: "Root cause analysis", body: "Not just 'it broke' — why, and what's different from normal." },
   { icon: GitBranch, title: "GitHub issues", body: "Auto-filed with full context, the moment something real happens." },
   { icon: Slack, title: "Slack alerts", body: "You find out in your team channel, not by scrolling logs." },
-  { icon: TrendingUp, title: "Provider recommendations", body: "Real, state-based — 'Claude recovered,' 'Groq is cheapest today.'" },
+  { icon: TrendingUp, title: "AI service guidance", body: "See which service is working best for your app today." },
   { icon: FileText, title: "Weekly reports", body: "Reliability, cost, and regressions — something worth forwarding." },
   { icon: Wand2, title: "Investigation prompts", body: "A dense, real-data prompt ready to paste into Claude or ChatGPT." },
 ];

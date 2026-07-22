@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Reveal } from "./Reveal";
 import { Card, SectionLabel } from "@/components/landing/ui/card";
 
-const PROVIDERS = [
+const SERVICES = [
   { name: "OpenAI", latency: 62, cost: 80, reliability: 68, note: "Degraded today" },
   { name: "Claude", latency: 74, cost: 55, reliability: 99, note: "Recommended" },
   { name: "Groq", latency: 96, cost: 15, reliability: 100, note: "Fastest & cheapest" },
@@ -34,14 +34,14 @@ export function ProviderComparison() {
   return (
     <section className="mx-auto max-w-6xl px-6 py-32">
       <Reveal className="mb-16 text-center">
-        <SectionLabel>Provider neutral</SectionLabel>
+        <SectionLabel>Independent view</SectionLabel>
         <h2 className="mx-auto max-w-xl text-[32px] font-semibold tracking-tight text-ink sm:text-[42px]">
-          Every provider&apos;s dashboard tells you it&apos;s fine. We don&apos;t work for them.
+          Every AI service says it&apos;s fine. We show what your app experienced.
         </h2>
       </Reveal>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {PROVIDERS.map((p, i) => (
+        {SERVICES.map((p, i) => (
           <motion.div
             key={p.name}
             initial={{ opacity: 0, y: 24 }}
@@ -60,7 +60,7 @@ export function ProviderComparison() {
                   {p.note}
                 </span>
               </div>
-              <Bar label="Latency" value={p.latency} />
+              <Bar label="Response time" value={p.latency} />
               <Bar label="Cost efficiency" value={p.cost} />
               <Bar label="Reliability" value={p.reliability} />
             </Card>

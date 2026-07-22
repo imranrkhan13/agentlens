@@ -65,7 +65,7 @@ export function GiantWordmarkFooter() {
       </motion.div>
 
       <div className="mt-8 text-center text-[11px] text-subtle">
-        © {new Date().getFullYear()} AgentLens. Every number on this page&apos;s product screens is either real or explicitly labeled illustrative.
+        Copyright {new Date().getFullYear()} AgentLens. Every number on this page&apos;s product screens is either real or explicitly labeled illustrative.
       </div>
     </footer>
   );

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FormEvent, Suspense, useState } from "react";
-import { CheckCircle2, LoaderCircle } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ function ResetPasswordForm() {
   }
 
   if (complete) return <div className="rounded-2xl border border-success/20 bg-success/[.07] p-5 text-sm leading-6 text-[#a9dfcc]"><CheckCircle2 className="size-5 text-success" /><p className="mt-3 font-medium">Password updated.</p><Link href="/login" className="mt-4 inline-block text-xs font-medium text-[#d6cfff] hover:text-white">Log in to AgentLens</Link></div>;
-  return <form onSubmit={onSubmit} className="space-y-5"><label className="block"><span className="text-xs font-medium text-[#dddce6]">New password</span><Input required minLength={10} maxLength={128} type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 10 characters" className="mt-2" /></label>{error && <p role="alert" className="rounded-xl border border-danger/20 bg-danger/[.08] px-3 py-2.5 text-xs text-[#ffb0b0]">{error}</p>}<Button type="submit" variant="primary" size="lg" className="w-full" disabled={pending}>{pending ? <LoaderCircle className="size-4 animate-spin" /> : "Set new password"}</Button></form>;
+  return <form onSubmit={onSubmit} className="space-y-5"><label className="block"><span className="text-xs font-medium text-[#dddce6]">New password</span><Input required minLength={10} maxLength={128} type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="At least 10 characters" className="mt-2" /></label>{error && <p role="alert" className="rounded-xl border border-danger/20 bg-danger/[.08] px-3 py-2.5 text-xs text-[#ffb0b0]">{error}</p>}<Button type="submit" variant="primary" size="lg" className="w-full" disabled={pending}>{pending ? "Saving password…" : "Set new password"}</Button></form>;
 }
 
 export default function ResetPasswordPage() {
