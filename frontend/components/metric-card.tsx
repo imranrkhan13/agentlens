@@ -1,0 +1,12 @@
+import { motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+export function MetricCard({ label, value, subtext, icon: Icon, loading = false, index = 0 }: { label: string; value: string; subtext: string; icon: LucideIcon; loading?: boolean; index?: number }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .055, duration: .32 }} className="surface-glow rounded-2xl p-4 sm:p-5">
+      <div className="flex items-center justify-between"><span className="text-xs font-medium text-[#9392a1]">{label}</span><span className="grid size-8 place-items-center rounded-xl border border-white/[.07] bg-white/[.035] text-[#aaa8ba]"><Icon className="size-4" /></span></div>
+      {loading ? <><Skeleton className="mt-5 h-7 w-24" /><Skeleton className="mt-3 h-3 w-32" /></> : <><p className="mt-5 text-2xl font-semibold tracking-[-.04em] text-[#f4f3fa]">{value}</p><p className="mt-2 text-xs text-[#777685]">{subtext}</p></>}
+    </motion.div>
+  );
+}

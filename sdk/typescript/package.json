@@ -1,0 +1,20 @@
+{
+  "name": "@agentlens/legacy-typescript-sdk",
+  "version": "0.1.0",
+  "description": "Legacy source location. Publish packages/agentlens as the agentlens npm package.",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
