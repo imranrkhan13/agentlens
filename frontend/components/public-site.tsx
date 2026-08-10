@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import {
   ArrowRight, Check, ChevronRight, CircleAlert, CircleCheck, Clock3, Code2,
   Copy, Github, GitBranch, Globe2, Layers3, LockKeyhole, MessageSquare,
@@ -52,6 +53,44 @@ function ProductVisual() {
   </div>;
 }
 
+
+function HeroSignalBoard() {
+  const reduceMotion = useReducedMotion();
+  const pointerX = useMotionValue(0);
+  const pointerY = useMotionValue(0);
+  const springX = useSpring(pointerX, { stiffness: 120, damping: 18, mass: .45 });
+  const springY = useSpring(pointerY, { stiffness: 120, damping: 18, mass: .45 });
+  const rotateX = useTransform(springY, [-.5, .5], [4, -4]);
+  const rotateY = useTransform(springX, [-.5, .5], [-5, 5]);
+  const driftX = useTransform(springX, [-.5, .5], [-10, 10]);
+  const driftY = useTransform(springY, [-.5, .5], [-8, 8]);
+  function move(event: React.PointerEvent<HTMLDivElement>) {
+    if (reduceMotion) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    pointerX.set((event.clientX - rect.left) / rect.width - .5);
+    pointerY.set((event.clientY - rect.top) / rect.height - .5);
+  }
+  function leave() { pointerX.set(0); pointerY.set(0); }
+  return <div className="hero-stage" onPointerMove={move} onPointerLeave={leave}>
+    <motion.div className="hero-stage-orbit hero-stage-orbit-one" animate={reduceMotion ? undefined : { rotate: 360 }} transition={{ duration: 28, repeat: Infinity, ease: "linear" }} />
+    <motion.div className="hero-stage-orbit hero-stage-orbit-two" animate={reduceMotion ? undefined : { rotate: -360 }} transition={{ duration: 42, repeat: Infinity, ease: "linear" }} />
+    <motion.div className="hero-board-wrap" style={reduceMotion ? undefined : { rotateX, rotateY, x: driftX, y: driftY }}>
+      <div className="hero-board-glow" />
+      <div className="hero-board">
+        <div className="hero-board-top"><div className="hero-board-brand"><span className="hero-window-dots"><i /><i /><i /></span><span>AgentLens / Live monitor</span></div><span className="hero-board-time"><span className="live-pulse" /> Live · updated just now</span></div>
+        <div className="hero-board-title"><div><span className="public-kicker">PROVIDER HEALTH</span><h3>Production signal</h3></div><span className="hero-range">Last 60 min⌄</span></div>
+        <div className="hero-board-main">
+          <div className="hero-chart-panel"><div className="hero-chart-stat"><div><span>Success rate</span><b>61.2%</b><small><em>↓ 37.2%</em> since 12:44 UTC</small></div><span className="hero-chart-chip">Incident detected</span></div><div className="hero-chart"><div className="hero-chart-lines" /><svg viewBox="0 0 520 180" preserveAspectRatio="none" aria-label="Success rate trend"><defs><linearGradient id="heroArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#d5a33e" stopOpacity=".28" /><stop offset="1" stopColor="#d5a33e" stopOpacity="0" /></linearGradient></defs><path className="hero-area-path" d="M0 52 C50 45 72 60 112 49 S175 42 212 48 S251 48 284 55 L315 57 C345 60 362 72 386 108 S422 125 452 135 S486 143 520 149 L520 180 L0 180Z" fill="url(#heroArea)" /><path className="hero-line-path" d="M0 52 C50 45 72 60 112 49 S175 42 212 48 S251 48 284 55 L315 57 C345 60 362 72 386 108 S422 125 452 135 S486 143 520 149" fill="none" stroke="#c88727" strokeWidth="3" vectorEffect="non-scaling-stroke" /></svg><motion.span className="hero-chart-alert" animate={reduceMotion ? undefined : { scale:[1,1.35,1], opacity:[.7,1,.7] }} transition={{ duration:2.2, repeat:Infinity }} /></div><div className="hero-chart-axis"><span>12:00</span><span>12:20</span><span>12:40</span><span>13:00</span></div></div>
+          <div className="hero-health-panel"><span className="public-kicker">LIVE PROVIDERS</span>{providers.map((provider, index) => <motion.div className="hero-health-row" key={provider.name} initial={reduceMotion ? false : { opacity:0, x:12 }} animate={{ opacity:1, x:0 }} transition={{ delay:.35 + index*.1, duration:.45 }}><span className={`health-dot ${provider.tone}`} /><b>{provider.name}</b><span className="hero-health-line"><i className={provider.tone} style={{ width: provider.value }} /></span><strong>{provider.value}</strong></motion.div>)}<div className="hero-health-note"><Sparkles size={13} /><span>Claude is the safest route right now</span></div></div>
+        </div>
+        <div className="hero-board-bottom"><span><CircleCheck size={13} /> 12,402 calls observed</span><span><ShieldCheck size={13} /> No prompt content collected</span></div>
+      </div>
+    </motion.div>
+    <motion.div className="hero-float-card hero-float-card-alert" style={reduceMotion ? undefined : { x: driftX, y: driftY }} initial={reduceMotion ? false : { opacity:0, x:-18, y:18 }} animate={{ opacity:1, x:0, y:0 }} transition={{ delay:.65, duration:.7, type:"spring", stiffness:100 }}><span className="float-icon float-icon-red"><CircleAlert size={14} /></span><div><small>12:47 UTC</small><b>Incident detected</b><span>OpenAI / gpt-4o</span></div></motion.div>
+    <motion.div className="hero-float-card hero-float-card-route" initial={reduceMotion ? false : { opacity:0, x:18, y:-16 }} animate={{ opacity:1, x:0, y:0 }} transition={{ delay:.9, duration:.7, type:"spring", stiffness:100 }}><span className="float-icon float-icon-gold"><GitBranch size={14} /></span><div><small>Recommended</small><b>Route to Claude</b><span>99.1% success rate</span></div></motion.div>
+  </div>;
+}
+
 export default function PublicSite() {
   const router = useRouter();
   const goSignup = () => router.push("/signup");
@@ -59,7 +98,7 @@ export default function PublicSite() {
     <div className="public-shell">
       <header className="public-nav"><a href="#top" className="public-brand"><span><Radar size={17} /></span>AgentLens</a><nav><a href="#product">Product</a><a href="#how-it-works">How it works</a><a href="#pricing">Pricing</a><a href="#docs">Docs</a></nav><div className="public-nav-actions"><a className="github-link" href="https://github.com/imranrkhan13/agentlens" target="_blank" rel="noreferrer"><Github size={15} /> GitHub</a><button className="nav-cta" onClick={goSignup}>Start monitoring</button></div></header>
 
-      <section id="top" className="public-hero"><div className="hero-copy"><SectionLabel>AI RELIABILITY INFRASTRUCTURE</SectionLabel><h1>Know your AI system<br /><i>is failing before</i><br />your users do.</h1><p>AgentLens watches every real call your application makes to OpenAI, Anthropic, Groq, Gemini, and more—then tells you what changed, why it happened, and what to do next.</p><div className="hero-actions"><PrimaryButton onClick={goSignup}>Start monitoring</PrimaryButton><a href="https://github.com/imranrkhan13/agentlens" target="_blank" rel="noreferrer" className="public-button public-button-secondary"><Github size={16} /> View on GitHub</a></div><div className="trust-row"><span><CircleCheck size={14} /> Open source</span><span><ActivityIcon /> Production telemetry</span><span><Globe2 size={14} /> Multi-provider</span><span><Zap size={14} /> Real-time alerts</span></div></div><div className="hero-incident"><IncidentCard /></div></section>
+      <section id="top" className="public-hero"><div className="hero-copy"><SectionLabel>AI RELIABILITY INFRASTRUCTURE</SectionLabel><h1>Know your AI system<br /><i>is failing before</i><br />your users do.</h1><p>AgentLens watches every real call your application makes to OpenAI, Anthropic, Groq, Gemini, and more—then tells you what changed, why it happened, and what to do next.</p><div className="hero-actions"><PrimaryButton onClick={goSignup}>Start monitoring</PrimaryButton><a href="https://github.com/imranrkhan13/agentlens" target="_blank" rel="noreferrer" className="public-button public-button-secondary"><Github size={16} /> View on GitHub</a></div><div className="trust-row"><span><CircleCheck size={14} /> Open source</span><span><ActivityIcon /> Production telemetry</span><span><Globe2 size={14} /> Multi-provider</span><span><Zap size={14} /> Real-time alerts</span></div></div><HeroSignalBoard /></section>
 
       <section id="product" className="visual-section"><div className="section-intro"><div><SectionLabel>SEE THE SIGNAL</SectionLabel><h2>When production gets weird,<br /><i>AgentLens gets specific.</i></h2></div><p>One place to see the incident, understand the cause, and choose the safest next move—without stitching together six dashboards.</p></div><ProductVisual /></section>
 
