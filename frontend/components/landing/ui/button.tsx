@@ -8,9 +8,9 @@ type Size = "default" | "lg";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-white text-bg hover:bg-white/90 shadow-[0_0_0_1px_rgba(255,255,255,0.1),0_8px_30px_-8px_rgba(110,86,207,0.6)]",
-  secondary: "glass text-ink hover:bg-white/[0.06]",
-  ghost: "text-muted hover:text-ink",
+    "bg-[#e9ae39] text-[#302612] hover:bg-[#f3bd50] shadow-[0_8px_28px_rgba(218,159,45,.22)]",
+  secondary: "border border-[#ded8c8] bg-[#fffdf7] text-[#4a463b] hover:bg-[#fbf1d9]",
+  ghost: "text-[#6f6a5e] hover:text-[#2f2d22]",
 };
 
 const sizes: Record<Size, string> = {

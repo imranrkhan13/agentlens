@@ -2,25 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
+:root { color-scheme: light; }
 
 * { border-color: rgba(255,255,255,.09); }
 
 html {
-  background: #08090C;
+  background: #f7f4eb;
   scroll-behavior: smooth;
 }
 
 body {
   min-height: 100vh;
   overflow-x: hidden;
-  background: #08090C;
-  color: #F4F4F6;
+  background: #f7f4eb;
+  color: #2f2d22;
   font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   font-feature-settings: "tnum" 1, "cv11" 1;
 }
 
-::selection { background: rgba(141,114,255,.35); color: white; }
+::selection { background: rgba(244,180,68,.35); color: #2f2d22; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -46,12 +46,14 @@ body {
   will-change: transform;
 }
 
+.bg-scene { opacity: .35; }
+
 .noise {
   position: fixed;
   inset: 0;
   z-index: -9;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: 0.012;
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='120'%20height='120'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='0.85'%20numOctaves='3'%20stitchTiles='stitch'/%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -71,7 +73,7 @@ body {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #FFFFFF 0%, #C7C4FF 45%, #6E56CF 100%);
+  background: linear-gradient(135deg, #302d22 0%, #8e6a22 58%, #c9822b 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -104,7 +106,7 @@ body {
 
 @layer components {
   .surface {
-    @apply border border-white/[0.09] bg-[#111217]/80 shadow-soft backdrop-blur-xl;
+    @apply border border-[#ded9c9] bg-[#fffdf7] shadow-soft backdrop-blur-xl;
   }
   .surface-glow {
     @apply surface relative overflow-hidden;
@@ -120,8 +122,9 @@ body {
     mask-composite: exclude;
     padding: 1px;
   }
+  .surface-glow::before { background: linear-gradient(120deg, rgba(244,180,68,.25), transparent 35%, transparent 66%, rgba(113,154,132,.18)); }
   .eyebrow {
-    @apply inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-black/20 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#a6a5b7];
+    @apply inline-flex items-center gap-2 rounded-full border border-[#e4ddcc] bg-[#fbf0d4] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#75664b];
   }
   .grid-fade {
     background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
@@ -129,3 +132,11 @@ body {
     mask-image: linear-gradient(to bottom, rgba(0,0,0,.6), transparent 80%);
   }
 }
+
+/* Light workspace overrides for existing screens. */
+html:not(.dark) [class*="bg-[#"], html:not(.dark) [class*="bg-black"] { background-color: #fffdf7 !important; }
+html:not(.dark) [class*="bg-white"] { background-color: rgba(255,255,255,.72) !important; }
+html:not(.dark) [class*="text-[#"] { color: #6f6a5e !important; }
+html:not(.dark) [class~="text-white"] { color: #2f2d22 !important; }
+html:not(.dark) [class*="border-white"] { border-color: #e4dfd2 !important; }
+html:not(.dark) [class*="shadow-soft"] { box-shadow: 0 18px 45px rgba(81,67,35,.08) !important; }
