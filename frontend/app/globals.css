@@ -196,3 +196,64 @@ html:not(.dark) [class*="shadow-soft"] { box-shadow: 0 18px 45px rgba(81,67,35,.
 .final-cta { display:flex; align-items:end; justify-content:space-between; gap:50px; padding:100px 88px; background:#f7eac9; }.final-cta h2 { margin-top:19px; font-size:clamp(39px,4vw,62px); }.final-cta p { max-width:510px; margin:24px 0 0; color:#766a55; font-size:15px; line-height:1.6; }.final-actions { display:flex; flex-direction:column; align-items:flex-start; gap:15px; min-width:190px; }.final-actions small { color:#a28e68; font-size:10px; }.public-footer { display:grid; grid-template-columns:1.3fr 1fr 1.5fr auto; align-items:center; gap:28px; padding:28px 32px; border-top:1px solid #e3dac9; background:#fffdf7; }.public-footer p,.public-footer small { color:#9a8f7d; font-size:11px; }.footer-links { display:flex; justify-content:flex-end; flex-wrap:wrap; gap:16px; }.footer-links a { color:#746d60; font-size:11px; text-decoration:none; }.footer-links a:hover { color:#2f2d22; }
 @media (max-width: 1000px) { .public-hero,.problem-section,.investigation-section,.integrations-section { grid-template-columns:1fr; gap:50px; }.public-hero { padding:76px 48px; }.hero-incident { justify-content:flex-start; }.incident-card { transform:none; max-width:520px; }.visual-section,.problem-section,.workflow-section,.bento-section,.dashboard-section,.provider-section,.investigation-section,.integrations-section,.opensource-section,.pricing-section { padding:78px 48px; }.bento-grid { grid-template-columns:1fr 1fr; }.bento-large { grid-row:span 1; grid-column:span 2; }.dashboard-metrics { grid-template-columns:repeat(3,1fr); }.dashboard-lower { grid-template-columns:1fr; }.public-footer { grid-template-columns:1fr 1fr; }.footer-links { justify-content:flex-start; } }
 @media (max-width: 680px) { .public-page { padding:0; }.public-shell { border:0; border-radius:0; }.public-nav { height:66px; padding:0 20px; }.public-nav nav,.github-link { display:none; }.public-hero { padding:58px 22px 60px; }.hero-copy h1 { font-size:49px; }.hero-copy>p { font-size:15px; }.trust-row { gap:11px; }.visual-section,.problem-section,.workflow-section,.bento-section,.dashboard-section,.provider-section,.investigation-section,.integrations-section,.opensource-section,.pricing-section { padding:65px 22px; }.section-intro { display:block; }.section-intro>p { margin-top:22px; }.product-visual { padding:16px; }.product-visual-head { display:block; }.product-head-right { justify-content:space-between; margin-top:15px; }.product-stats { grid-template-columns:1fr; }.product-stats>div { border-right:0; border-bottom:1px solid #e5dccb; padding:10px 0; }.product-grid,.comparison,.dashboard-lower { grid-template-columns:1fr; }.comparison-panel { min-height:300px; }.workflow-line { grid-template-columns:1fr; gap:0; }.workflow-step { min-height:105px; padding-left:45px; }.workflow-number { position:absolute; left:0; top:2px; }.workflow-node { position:absolute; left:0; top:25px; margin:0; }.workflow-arrow { top:55px; right:auto; left:9px; transform:rotate(90deg); }.install-strip { align-items:flex-start; flex-wrap:wrap; }.install-strip>p { flex-basis:100%; margin:0; }.bento-grid { grid-template-columns:1fr; }.bento-large { grid-column:auto; }.dashboard-metrics { grid-template-columns:1fr 1fr; }.matrix-head { display:none; }.matrix-row { grid-template-columns:1fr 1fr; gap:10px; }.matrix-bar { grid-column:span 2; }.matrix-tag { justify-self:end; }.opensource-section { grid-template-columns:1fr; }.final-cta { display:block; padding:70px 22px; }.final-actions { margin-top:32px; }.public-footer { grid-template-columns:1fr; padding:26px 22px; }.footer-links { justify-content:flex-start; } }
+
+/* Motion polish: clear, quiet movement that explains the product. */
+@keyframes public-rise { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+@keyframes public-float { 0%,100% { transform:translateY(0) rotate(1.5deg); } 50% { transform:translateY(-10px) rotate(1.5deg); } }
+@keyframes public-pulse { 0%,100% { box-shadow:0 0 0 0 rgba(196,88,69,.2); } 50% { box-shadow:0 0 0 7px rgba(196,88,69,0); } }
+@keyframes public-draw { from { stroke-dashoffset:900; } to { stroke-dashoffset:0; } }
+@keyframes public-scan { from { transform:translateX(-110%); } to { transform:translateX(110%); } }
+@keyframes public-blink { 0%,45%,100% { opacity:1; } 50%,95% { opacity:.25; } }
+.public-hero { position:relative; isolation:isolate; overflow:hidden; }
+.public-hero::before { content:""; position:absolute; inset:0; z-index:-2; opacity:.32; background-image:linear-gradient(#e7dfcf 1px,transparent 1px),linear-gradient(90deg,#e7dfcf 1px,transparent 1px); background-size:56px 56px; mask-image:linear-gradient(90deg,rgba(0,0,0,.75),transparent 72%); }
+.public-hero::after { content:""; position:absolute; z-index:-1; width:620px; height:620px; right:-230px; bottom:-260px; border-radius:50%; background:radial-gradient(circle,rgba(236,180,61,.23),transparent 68%); filter:blur(4px); }
+.hero-copy { animation:public-rise .75s cubic-bezier(.2,.8,.2,1) both; }
+.hero-copy .public-label { animation:public-rise .65s .05s both; }
+.hero-copy h1 { animation:public-rise .8s .12s both; }
+.hero-copy>p { animation:public-rise .75s .22s both; }
+.hero-copy .hero-actions { animation:public-rise .7s .32s both; }
+.hero-copy .trust-row { animation:public-rise .7s .42s both; }
+.hero-incident { position:relative; animation:public-rise .85s .18s both; }
+.hero-incident::before { content:""; position:absolute; width:calc(100% + 34px); height:calc(100% + 34px); border:1px solid rgba(222,177,77,.36); border-radius:30px; transform:rotate(-3deg); pointer-events:none; }
+.hero-incident::after { content:""; position:absolute; inset:10% -10% auto; height:1px; background:linear-gradient(90deg,transparent,#e3bb64,transparent); opacity:.7; animation:public-scan 4.5s ease-in-out infinite; }
+.hero-incident .incident-card { animation:public-float 5.5s ease-in-out infinite; transition:box-shadow .3s ease,transform .3s ease; }
+.hero-incident:hover .incident-card { animation-play-state:paused; transform:translateY(-8px) rotate(0deg); box-shadow:0 28px 60px rgba(83,63,25,.17); }
+.incident-badge { animation:public-pulse 2.4s ease-in-out infinite; }
+.incident-recommendation { transition:transform .25s ease,box-shadow .25s ease; }
+.incident-recommendation:hover { transform:translateX(5px); box-shadow:0 7px 18px rgba(94,75,31,.08); }
+.public-nav nav a { position:relative; }
+.public-nav nav a::after { content:""; position:absolute; left:0; right:100%; bottom:-7px; height:1px; background:#bd8e2e; transition:right .25s ease; }
+.public-nav nav a:hover::after { right:0; }
+.public-brand span { transition:transform .3s ease,background .3s ease; }
+.public-brand:hover span { transform:rotate(-12deg) scale(1.08); background:#ffe8a6; }
+.public-button,.nav-cta,.text-link { transition:transform .22s ease,box-shadow .22s ease,background .22s ease,color .22s ease; }
+.public-button:hover,.nav-cta:hover { box-shadow:0 12px 28px rgba(99,75,27,.13); }
+.product-visual,.dashboard-mock { transition:transform .35s ease,box-shadow .35s ease; }
+.product-visual:hover,.dashboard-mock:hover { transform:translateY(-5px); box-shadow:0 28px 70px rgba(89,68,28,.13); }
+.timeline-row { transition:transform .2s ease,color .2s ease; }
+.timeline-row:hover { transform:translateX(5px); color:#3d382d; }
+.timeline-row:hover .timeline-dot { transform:scale(1.45); }
+.timeline-dot { transition:transform .2s ease; }
+.timeline-row:nth-child(5) .timeline-dot { animation:public-pulse 2s ease-in-out infinite; }
+.provider-row,.bento-provider,.health-row { transition:transform .2s ease; }
+.provider-row:hover,.bento-provider:hover,.health-row:hover { transform:translateX(4px); }
+.provider-bar i { transform-origin:left; animation:public-rise .8s .2s both; }
+.bento-card,.comparison-panel,.price-card,.prompt-card,.feed-item { transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease; }
+.bento-card:hover,.comparison-panel:hover,.price-card:hover,.prompt-card:hover { transform:translateY(-6px); box-shadow:0 18px 34px rgba(84,66,29,.1); border-color:#d5b15b; }
+.bento-large:hover { transform:translateY(-6px) scale(1.005); }
+.workflow-step { transition:transform .25s ease; }
+.workflow-step:hover { transform:translateY(-5px); }
+.workflow-node { transition:transform .25s ease,background .25s ease,box-shadow .25s ease; }
+.workflow-step:hover .workflow-node { transform:scale(1.16) rotate(7deg); background:#f4d989; box-shadow:0 6px 18px rgba(196,145,43,.2); }
+.workflow-step:hover h3 { color:#987126; }
+.workflow-arrow { transition:transform .25s ease,color .25s ease; }
+.workflow-step:hover .workflow-arrow { transform:translateX(4px); color:#9b7121; }
+.trend-chart i { transform-origin:bottom; animation:public-rise .7s both; }
+.trend-chart i:nth-child(2){animation-delay:.06s}.trend-chart i:nth-child(3){animation-delay:.12s}.trend-chart i:nth-child(4){animation-delay:.18s}.trend-chart i:nth-child(5){animation-delay:.24s}.trend-chart i:nth-child(6){animation-delay:.3s}.trend-chart i:nth-child(7){animation-delay:.36s}.trend-chart i:nth-child(8){animation-delay:.42s}.trend-chart i:nth-child(9){animation-delay:.48s}
+.line-chart path { stroke-dasharray:900; stroke-dashoffset:900; animation:public-draw 1.8s .35s ease-out forwards; }
+.prompt-cursor { animation:public-blink 1.3s steps(1) infinite; }
+.integration-pills span,.sdk-row span { transition:transform .2s ease,background .2s ease,border-color .2s ease; }
+.integration-pills span:hover,.sdk-row span:hover { transform:translateY(-3px); border-color:#d8b45e; background:#fff5d9; }
+.feed-item:hover { transform:translateX(5px); border-color:#d8b45e; }
+.price-card button:hover { color:#694c13; transform:translateX(3px); }
+@media (prefers-reduced-motion: reduce) { .hero-copy,.hero-copy .public-label,.hero-copy h1,.hero-copy>p,.hero-copy .hero-actions,.hero-copy .trust-row,.hero-incident,.hero-incident .incident-card,.trend-chart i,.line-chart path { animation:none !important; }.public-button:hover,.nav-cta:hover,.bento-card:hover,.comparison-panel:hover,.price-card:hover,.prompt-card:hover,.product-visual:hover,.dashboard-mock:hover { transform:none; } }
