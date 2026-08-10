@@ -134,9 +134,10 @@ body {
 }
 
 /* Light workspace overrides for existing screens. */
-html:not(.dark) [class*="bg-[#"], html:not(.dark) [class*="bg-black"] { background-color: #fffdf7 !important; }
+html:not(.dark) [class*="bg-[#0"], html:not(.dark) [class*="bg-[#1"], html:not(.dark) [class*="bg-black"] { background-color: #fffdf7 !important; }
 html:not(.dark) [class*="bg-white"] { background-color: rgba(255,255,255,.72) !important; }
-html:not(.dark) [class*="text-[#"] { color: #6f6a5e !important; }
+html:not(.dark) [class*="text-[#f"], html:not(.dark) [class*="text-[#e"], html:not(.dark) [class*="text-[#d"] { color: #2f2d22 !important; }
+html:not(.dark) [class*="text-[#7"], html:not(.dark) [class*="text-[#8"], html:not(.dark) [class*="text-[#9"] { color: #756f64 !important; }
 html:not(.dark) [class~="text-white"] { color: #2f2d22 !important; }
 html:not(.dark) [class*="border-white"] { border-color: #e4dfd2 !important; }
 html:not(.dark) [class*="shadow-soft"] { box-shadow: 0 18px 45px rgba(81,67,35,.08) !important; }
