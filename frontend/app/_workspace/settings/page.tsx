@@ -12,6 +12,7 @@ import { useProjectKeyReveal } from "@/components/workspace/project-key-reveal";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { isAgentLensApiError } from "@/lib/api/diagnostics";
 
 const technologies: Array<{ value: ProjectTechnology; label: string; hint: string }> = [
   { value: "nextjs", label: "Next.js", hint: "A React website" },
@@ -43,7 +44,7 @@ export default function SettingsPage() {
       await refresh();
       router.push(`/app/projects/${project.project_id}`);
     },
-    onError: () => setError("We could not create your project. Please try again."),
+    onError: (createError) => setError(isAgentLensApiError(createError) ? createError.diagnostic.summary : "We could not create your project. Please try again."),
   });
 
   function continueTo(nextStep: number) {

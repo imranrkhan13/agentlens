@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Command, LogOut, Menu, Plus, Search, X } from "lucide-react";
+import { Bell, Command, LogOut, Menu, Plus, Search, ShieldCheck, X } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,6 +24,7 @@ export function TopBar() {
         <div className="flex items-center gap-2 sm:gap-3">
           <button type="button" aria-label="Search activity" className="workspace-search hidden h-9 w-56 items-center gap-2 rounded-xl border border-[#dbd9cf] bg-[#f6f5ef] px-3 text-left text-xs text-[#85877f] transition hover:border-[#bdbcb3] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#a4bd37] md:flex"><Search className="size-3.5" aria-hidden="true" /> Search activity <span className="ml-auto flex items-center gap-0.5 rounded border border-[#d5d3ca] bg-white px-1.5 py-0.5 text-[9px]"><Command className="size-3" aria-hidden="true" />K</span></button>
           <div className="hidden rounded-full border border-[#d9d7cd] bg-[#f6f5ef] px-2.5 py-1.5 md:block"><StatusPill status={verified ? "healthy" : session ? "degraded" : "neutral"} label={verified ? "Ready" : session ? "Fix connection" : "Get started"} /></div>
+          <Button asChild variant="ghost" size="sm" className="size-9 px-0" aria-label="Security center"><Link href="/app/security"><ShieldCheck className="size-4" aria-hidden="true" /></Link></Button>
           <Button asChild variant="ghost" size="sm" className="size-9 px-0" aria-label="Notifications"><Link href="/app/events"><Bell className="size-4" aria-hidden="true" /></Link></Button>
           <Button type="button" variant="ghost" size="sm" className="size-9 px-0" aria-label="Log out" onClick={async () => { await authClient.signOut(); router.replace("/login"); router.refresh(); }}><LogOut className="size-4" aria-hidden="true" /></Button>
           <Button asChild size="sm" variant="primary" className="hidden sm:inline-flex"><Link href="/app/projects/new"><Plus className="size-3.5" aria-hidden="true" /> New project</Link></Button>

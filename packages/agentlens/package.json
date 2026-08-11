@@ -1,6 +1,6 @@
 {
   "name": "agentlens",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Privacy-safe telemetry for AgentLens.",
   "keywords": ["ai", "telemetry", "observability", "llm", "agentlens"],
   "type": "module",
@@ -26,7 +26,7 @@
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.esm.json",
-    "test": "npm run build && node ./tests/telemetry-enrichment.test.mjs && node ./tests/register.test.mjs && node ./tests/cli.test.mjs",
+    "test": "npm run build && node ./tests/telemetry-enrichment.test.mjs && node ./tests/register.test.mjs && node ./tests/cli.test.mjs && node ./tests/provider-match.test.mjs",
     "verify:local": "node ./examples/local-verify.mjs",
     "prepack": "npm run build"
   },

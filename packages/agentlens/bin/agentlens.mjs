@@ -5,6 +5,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, extname, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import { runProviderMatch } from "./provider-match.mjs";
 
 const frameworks = new Set(["nextjs", "node", "express", "fastapi", "django", "laravel", "python", "other"]);
 
@@ -28,6 +29,20 @@ function parseArgs(values) {
       options[value.slice(2).replace(/-([a-z])/g, (_, character) => character.toUpperCase())] = next;
       index += 1;
     } else fail(`I do not recognise ${value}. Run \`npx agentlens init\`.`);
+  }
+  return options;
+}
+
+function parseMatchArgs(values) {
+  const options = {};
+  for (let index = 0; index < values.length; index += 1) {
+    const value = values[index];
+    if (["--code", "--workspace"].includes(value)) {
+      const next = values[index + 1];
+      if (!next || next.startsWith("--")) fail(`${value} needs a value.`);
+      options[value.slice(2)] = next;
+      index += 1;
+    } else fail(`I do not recognise ${value}. Run \`npx agentlens match --help\`.`);
   }
   return options;
 }
@@ -185,10 +200,11 @@ async function init() {
 }
 
 function printUsage() {
-  console.log("AgentLens\n\nRun: npx agentlens init\n\nOptions: --api-key, --endpoint, --framework, --entry, --yes");
+  console.log("AgentLens\n\nSet up monitoring:  npx agentlens init\nCompare AI providers: npx agentlens match --code YOUR_ONE_TIME_CODE\n\nSetup options: --api-key, --endpoint, --framework, --entry, --yes\nMatch options: --code, --workspace");
 }
 
 const command = process.argv[2];
 if (!command || command === "--help" || command === "-h") printUsage();
 else if (command === "init") init().catch((error) => { console.error(error.message); process.exitCode = 1; });
+else if (command === "match") runProviderMatch(parseMatchArgs(process.argv.slice(3)), ask).catch((error) => { console.error(`[AgentLens] ${error.message}`); process.exitCode = 1; });
 else { console.error(`[AgentLens] Unknown command: ${command}`); printUsage(); process.exitCode = 1; }

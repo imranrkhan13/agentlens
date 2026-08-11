@@ -62,3 +62,13 @@ each user's accepted event count with that key's final stats and exits nonzero
 if any differ, detecting cross-tenant data exposure during concurrent traffic.
 See [the recorded local result](docs/LOAD_TEST_RESULTS.md) for measured—not
 estimated—numbers and the test configuration.
+
+## Provider Match
+
+The signed-in app includes a plain-language provider comparison workflow. It
+creates visible synthetic checks and runs them against the user's own provider
+accounts with `npx agentlens match`. Provider credentials and raw answers stay
+local; AgentLens stores only the private test plan and metadata-only scorecard.
+
+See [Provider Match](docs/PROVIDER_MATCH.md) for the security boundary,
+supported providers, scoring model, and deployment migration.

@@ -200,6 +200,15 @@ export function canUseBackendReport(report: ConnectionDiagnosticsReport | null) 
 
 function detailsForStatus(status: number, url: string, method: string, body: string | null, apiKey?: string): Pick<RequestDiagnostic, "category" | "title" | "summary" | "suggestions"> {
   const path = (() => { try { return new URL(url).pathname; } catch { return url; } })();
+  if (status === 402) {
+    const detail = (() => { try { const parsed = JSON.parse(body || "{}") as { detail?: unknown }; return typeof parsed.detail === "string" ? parsed.detail : null; } catch { return null; } })();
+    return {
+      category: "forbidden",
+      title: "Project limit reached",
+      summary: detail || "Your current plan does not include another project.",
+      suggestions: ["Open Plan & billing to compare project limits.", "Keep your current plan by using an existing project."],
+    };
+  }
   if (status === 401) return {
     category: "unauthorized",
     title: "401 Unauthorized",

@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { assertAuthEnvironment, auth } from "@/lib/auth";
+import { getBillingState } from "@/lib/billing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,6 +33,16 @@ async function handle(request: Request, context: { params: Promise<{ path: strin
     const requestUrl = new URL(request.url);
     const targetPath = backendPath(path, requestUrl.searchParams);
     if (!targetPath) return NextResponse.json({ detail: "Unknown application API route" }, { status: 404 });
+
+    if (request.method === "POST" && path.join("/") === "projects") {
+      const billing = await getBillingState(session.user.id);
+      if (billing.projectCount >= billing.projectLimit) {
+        return NextResponse.json(
+          { detail: `Your ${billing.planName} plan includes ${billing.projectLimit} ${billing.projectLimit === 1 ? "project" : "projects"}. Upgrade before creating another.` },
+          { status: 402 },
+        );
+      }
+    }
 
     const internalToken = process.env.AGENTLENS_INTERNAL_API_TOKEN;
     if (!internalToken) return NextResponse.json({ detail: "Application API is not configured" }, { status: 503 });

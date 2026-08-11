@@ -23,6 +23,26 @@ remote AgentLens service, enter its API address when asked. The default is
 Your project key is stored in an environment file and is never printed by the
 CLI. Do not commit that file or use the key in browser code.
 
+## Compare providers on your own use case
+
+Open **Find my AI provider** in AgentLens, describe the job in plain language,
+and choose the providers you want to compare. AgentLens creates visible,
+synthetic checks and gives you one short-lived command:
+
+```bash
+npx agentlens match --code YOUR_ONE_TIME_CODE
+```
+
+The runner reads supported provider credentials from your existing local
+environment, sends the same synthetic checks to each selected model, and scores
+instruction following, reliability, latency, and estimated token cost. API
+keys and raw model responses are never uploaded. Only the metadata-only
+scorecard is returned to your private AgentLens account.
+
+Supported local credentials include `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`,
+`GEMINI_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY`, and
+`OPENROUTER_API_KEY`. Ollama uses `OLLAMA_HOST` or its standard local address.
+
 ## Manual setup and custom AI services
 
 ```ts
