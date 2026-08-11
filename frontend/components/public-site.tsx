@@ -1,130 +1,250 @@
 "use client";
 
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
-import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import {
-  ArrowRight, Check, ChevronRight, CircleAlert, CircleCheck, Clock3, Code2,
-  Copy, Github, GitBranch, Globe2, Layers3, LockKeyhole, MessageSquare,
-  Radar, ScanSearch, Server, ShieldCheck, Sparkles, Terminal, Webhook, Zap,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "framer-motion";
+import {
+  Activity,
+  ArrowDownRight,
+  ArrowRight,
+  Check,
+  ChevronRight,
+  CircleAlert,
+  CircleCheck,
+  Clock3,
+  Code2,
+  Copy,
+  Github,
+  GitBranch,
+  Globe2,
+  LockKeyhole,
+  MessageSquare,
+  Radar,
+  ScanSearch,
+  Server,
+  ShieldCheck,
+  Sparkles,
+  Terminal,
+  Webhook,
+  Zap,
 } from "lucide-react";
 
-const workflow = [
-  ["01", "Connect", "One guided command. No rewrite."],
-  ["02", "Observe", "Your real AI use appears here."],
-  ["03", "Detect", "Deviation from your own baseline."],
-  ["04", "Explain", "Why it happened, in plain English."],
-  ["05", "Recommend", "A safer provider or next step."],
-  ["06", "Resolve", "Fixed before most users notice."],
-] as const;
+const githubUrl = "https://github.com/imranrkhan13/agentlens";
 
 const providers = [
-  { name: "OpenAI", value: "61%", label: "Degraded today", tone: "bad" },
-  { name: "Claude", value: "99%", label: "Recommended", tone: "good" },
-  { name: "Groq", value: "100%", label: "Fastest", tone: "good" },
-  { name: "Gemini", value: "97%", label: "Stable", tone: "info" },
+  { name: "OpenAI", score: 61, status: "Degraded", tone: "danger", latency: "2.8s" },
+  { name: "Anthropic", score: 99, status: "Recommended", tone: "success", latency: "410ms" },
+  { name: "Groq", score: 100, status: "Fastest", tone: "success", latency: "180ms" },
+  { name: "Gemini", score: 97, status: "Stable", tone: "neutral", latency: "520ms" },
 ] as const;
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return <p className="public-label">{children}</p>;
+const workflow = [
+  { number: "01", title: "Connect", body: "Add one import to your server. No proxy and no rewrite.", icon: Terminal },
+  { number: "02", title: "Observe", body: "Real calls become a baseline unique to your application.", icon: Activity },
+  { number: "03", title: "Detect", body: "AgentLens catches meaningful changes, not noisy thresholds.", icon: Radar },
+  { number: "04", title: "Explain", body: "Every incident arrives with evidence and a likely cause.", icon: ScanSearch },
+  { number: "05", title: "Resolve", body: "Route safely or hand a complete investigation to your team.", icon: CircleCheck },
+] as const;
+
+const ease = [0.22, 1, 0.36, 1] as const;
+
+function Eyebrow({ children }: { children: React.ReactNode }) {
+  return <span className="al-eyebrow"><i />{children}</span>;
 }
 
-function PrimaryButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
-  return <button onClick={onClick} className="public-button public-button-primary">{children}<ArrowRight size={15} /></button>;
-}
-
-function MiniStatus({ tone, children }: { tone: "good" | "bad" | "info"; children: React.ReactNode }) {
-  return <span className={`public-status public-status-${tone}`}><span />{children}</span>;
-}
-
-function IncidentCard({ compact = false }: { compact?: boolean }) {
-  return <div className={`incident-card ${compact ? "incident-card-compact" : ""}`}>
-    <div className="incident-card-top"><div><span className="public-kicker">LIVE INCIDENT</span><h3>OpenAI / gpt-4o</h3></div><span className="incident-badge">DEGRADED</span></div>
-    <div className="incident-rate"><div><span>Success rate</span><strong>98.4%</strong></div><div className="incident-arrow">→</div><div><span>Now</span><strong className="incident-red">61.2%</strong></div></div>
-    {!compact && <><div className="incident-rule" /><div className="incident-meta"><div><span>Detected</span><b>4 min ago</b></div><div><span>Root cause</span><b>Rate limiting</b></div></div><div className="incident-recommendation"><div className="recommendation-icon"><Sparkles size={14} /></div><div><span>Recommended action</span><b>Route traffic to Claude</b><small>99.1% success · normal latency</small></div><ChevronRight size={15} /></div></>}
-  </div>;
-}
-
-function ProductVisual() {
-  return <div className="product-visual">
-    <div className="product-visual-head"><div><span className="public-kicker">INCIDENT #412</span><h3>OpenAI / gpt-4o</h3></div><div className="product-head-right"><MiniStatus tone="bad">Open</MiniStatus><span className="visual-date">Today, 12:47 UTC</span></div></div>
-    <div className="product-stats"><div><span>Success rate</span><b>98.4% <em>→ 61.2%</em></b></div><div><span>Latency</span><b>840ms <em>→ 2.8s</em></b></div><div><span>Cost impact</span><b className="amber-text">+14%</b></div></div>
-    <div className="product-grid"><div className="timeline-panel"><div className="panel-title"><span>Incident timeline</span><span className="muted-small">7 events</span></div><div className="timeline">{[["12:41", "Baseline normal", "normal"], ["12:44", "Latency increased", "warn"], ["12:45", "Retry rate increased", "warn"], ["12:46", "Success rate dropped", "bad"], ["12:47", "Incident detected", "bad"], ["12:47", "Slack alert sent", "good"], ["12:48", "GitHub issue #412 created", "info"]].map(([time, label, tone]) => <div className="timeline-row" key={time + label}><span className="timeline-time">{time}</span><span className={`timeline-dot ${tone}`} /><span>{label}</span></div>)}</div></div><div className="visual-side"><div className="provider-panel"><div className="panel-title"><span>Provider health</span><span className="muted-small">Live</span></div>{providers.map((p) => <div className="provider-row" key={p.name}><span>{p.name}</span><div className="provider-bar"><i className={p.tone} style={{ width: p.value }} /></div><b>{p.value}</b></div>)}</div><div className="visual-recommendation"><span className="public-kicker">RECOMMENDATION</span><strong>Route traffic to Claude</strong><p>Similar cost, normal latency, and 99.1% success rate right now.</p><button>View incident <ArrowRight size={13} /></button></div></div></div>
-    <div className="product-visual-foot"><span><CircleCheck size={14} /> All data is from your production telemetry</span><button><Copy size={13} /> Copy investigation prompt</button></div>
-  </div>;
-}
-
-
-function HeroSignalBoard() {
+function Reveal({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
   const reduceMotion = useReducedMotion();
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const springX = useSpring(pointerX, { stiffness: 120, damping: 18, mass: .45 });
-  const springY = useSpring(pointerY, { stiffness: 120, damping: 18, mass: .45 });
-  const rotateX = useTransform(springY, [-.5, .5], [4, -4]);
-  const rotateY = useTransform(springX, [-.5, .5], [-5, 5]);
-  const driftX = useTransform(springX, [-.5, .5], [-10, 10]);
-  const driftY = useTransform(springY, [-.5, .5], [-8, 8]);
-  function move(event: React.PointerEvent<HTMLDivElement>) {
-    if (reduceMotion) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    pointerX.set((event.clientX - rect.left) / rect.width - .5);
-    pointerY.set((event.clientY - rect.top) / rect.height - .5);
-  }
-  function leave() { pointerX.set(0); pointerY.set(0); }
-  return <div className="hero-stage" onPointerMove={move} onPointerLeave={leave}>
-    <motion.div className="hero-stage-orbit hero-stage-orbit-one" animate={reduceMotion ? undefined : { rotate: 360 }} transition={{ duration: 28, repeat: Infinity, ease: "linear" }} />
-    <motion.div className="hero-stage-orbit hero-stage-orbit-two" animate={reduceMotion ? undefined : { rotate: -360 }} transition={{ duration: 42, repeat: Infinity, ease: "linear" }} />
-    <motion.div className="hero-board-wrap" style={reduceMotion ? undefined : { rotateX, rotateY, x: driftX, y: driftY }}>
-      <div className="hero-board-glow" />
-      <div className="hero-board">
-        <div className="hero-board-top"><div className="hero-board-brand"><span className="hero-window-dots"><i /><i /><i /></span><span>AgentLens / Live monitor</span></div><span className="hero-board-time"><span className="live-pulse" /> Live · updated just now</span></div>
-        <div className="hero-board-title"><div><span className="public-kicker">PROVIDER HEALTH</span><h3>Production signal</h3></div><span className="hero-range">Last 60 min⌄</span></div>
-        <div className="hero-board-main">
-          <div className="hero-chart-panel"><div className="hero-chart-stat"><div><span>Success rate</span><b>61.2%</b><small><em>↓ 37.2%</em> since 12:44 UTC</small></div><span className="hero-chart-chip">Incident detected</span></div><div className="hero-chart"><div className="hero-chart-lines" /><svg viewBox="0 0 520 180" preserveAspectRatio="none" aria-label="Success rate trend"><defs><linearGradient id="heroArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stopColor="#d5a33e" stopOpacity=".28" /><stop offset="1" stopColor="#d5a33e" stopOpacity="0" /></linearGradient></defs><path className="hero-area-path" d="M0 52 C50 45 72 60 112 49 S175 42 212 48 S251 48 284 55 L315 57 C345 60 362 72 386 108 S422 125 452 135 S486 143 520 149 L520 180 L0 180Z" fill="url(#heroArea)" /><path className="hero-line-path" d="M0 52 C50 45 72 60 112 49 S175 42 212 48 S251 48 284 55 L315 57 C345 60 362 72 386 108 S422 125 452 135 S486 143 520 149" fill="none" stroke="#c88727" strokeWidth="3" vectorEffect="non-scaling-stroke" /></svg><motion.span className="hero-chart-alert" animate={reduceMotion ? undefined : { scale:[1,1.35,1], opacity:[.7,1,.7] }} transition={{ duration:2.2, repeat:Infinity }} /></div><div className="hero-chart-axis"><span>12:00</span><span>12:20</span><span>12:40</span><span>13:00</span></div></div>
-          <div className="hero-health-panel"><span className="public-kicker">LIVE PROVIDERS</span>{providers.map((provider, index) => <motion.div className="hero-health-row" key={provider.name} initial={reduceMotion ? false : { opacity:0, x:12 }} animate={{ opacity:1, x:0 }} transition={{ delay:.35 + index*.1, duration:.45 }}><span className={`health-dot ${provider.tone}`} /><b>{provider.name}</b><span className="hero-health-line"><i className={provider.tone} style={{ width: provider.value }} /></span><strong>{provider.value}</strong></motion.div>)}<div className="hero-health-note"><Sparkles size={13} /><span>Claude is the safest route right now</span></div></div>
-        </div>
-        <div className="hero-board-bottom"><span><CircleCheck size={13} /> 12,402 calls observed</span><span><ShieldCheck size={13} /> No prompt content collected</span></div>
-      </div>
+  return (
+    <motion.div
+      className={className}
+      initial={reduceMotion ? false : { opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-8%" }}
+      transition={{ duration: 0.8, delay, ease }}
+    >
+      {children}
     </motion.div>
-    <motion.div className="hero-float-card hero-float-card-alert" style={reduceMotion ? undefined : { x: driftX, y: driftY }} initial={reduceMotion ? false : { opacity:0, x:-18, y:18 }} animate={{ opacity:1, x:0, y:0 }} transition={{ delay:.65, duration:.7, type:"spring", stiffness:100 }}><span className="float-icon float-icon-red"><CircleAlert size={14} /></span><div><small>12:47 UTC</small><b>Incident detected</b><span>OpenAI / gpt-4o</span></div></motion.div>
-    <motion.div className="hero-float-card hero-float-card-route" initial={reduceMotion ? false : { opacity:0, x:18, y:-16 }} animate={{ opacity:1, x:0, y:0 }} transition={{ delay:.9, duration:.7, type:"spring", stiffness:100 }}><span className="float-icon float-icon-gold"><GitBranch size={14} /></span><div><small>Recommended</small><b>Route to Claude</b><span>99.1% success rate</span></div></motion.div>
-  </div>;
+  );
 }
 
-export default function PublicSite() {
+function AnimatedHeadline() {
+  const reduceMotion = useReducedMotion();
+  const lines = [
+    <span key="one">Know when your AI</span>,
+    <span key="two">starts <em>breaking.</em></span>,
+    <span key="three">Before users do.</span>,
+  ];
+
+  return (
+    <h1 className="al-hero-title" aria-label="Know when your AI starts breaking. Before users do.">
+      {lines.map((line, index) => (
+        <span className="al-title-mask" key={index}>
+          <motion.span
+            initial={reduceMotion ? false : { y: "115%", rotate: 1.5 }}
+            animate={{ y: "0%", rotate: 0 }}
+            transition={{ duration: 1, delay: 0.12 + index * 0.11, ease }}
+          >
+            {line}
+          </motion.span>
+        </span>
+      ))}
+    </h1>
+  );
+}
+
+function MagneticButton({ children, onClick, secondary = false }: { children: React.ReactNode; onClick: () => void; secondary?: boolean }) {
+  const reduceMotion = useReducedMotion();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { stiffness: 250, damping: 18 });
+  const springY = useSpring(y, { stiffness: 250, damping: 18 });
+
+  return (
+    <motion.button
+      className={`al-button ${secondary ? "al-button-secondary" : "al-button-primary"}`}
+      style={reduceMotion ? undefined : { x: springX, y: springY }}
+      onPointerMove={(event) => {
+        if (reduceMotion) return;
+        const rect = event.currentTarget.getBoundingClientRect();
+        x.set((event.clientX - rect.left - rect.width / 2) * 0.12);
+        y.set((event.clientY - rect.top - rect.height / 2) * 0.16);
+      }}
+      onPointerLeave={() => { x.set(0); y.set(0); }}
+      onClick={onClick}
+      whileTap={{ scale: 0.97 }}
+    >
+      <span>{children}</span>
+      <i><ArrowRight size={15} /></i>
+    </motion.button>
+  );
+}
+
+function SignalGraph() {
+  const reduceMotion = useReducedMotion();
+  const segments = [0, -4, 2, -2, 4, -3, 2, 0, 1, 9, 20, 42, 61, 72, 79, 83];
+  return (
+    <div className="al-signal-graph" aria-label="Success rate dropped sharply after 12:44 UTC">
+      <div className="al-graph-grid" />
+      <div className="al-graph-threshold"><span>baseline 98.4%</span></div>
+      <div className="al-graph-line">
+        {segments.slice(0, -1).map((point, index) => {
+          const next = segments[index + 1];
+          const delta = next - point;
+          const length = Math.sqrt(42 * 42 + delta * delta);
+          const angle = Math.atan2(delta, 42) * (180 / Math.PI);
+          return (
+            <motion.i
+              key={index}
+              className={index > 8 ? "falling" : ""}
+              style={{ left: `${index * 6.42}%`, top: `${22 + point * 0.66}%`, width: `${length}px`, rotate: `${angle}deg` }}
+              initial={reduceMotion ? false : { scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.32, delay: 0.55 + index * 0.045, ease }}
+            />
+          );
+        })}
+      </div>
+      <motion.span className="al-graph-ping" initial={reduceMotion ? false : { scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ delay: 1.32, type: "spring", stiffness: 220 }} />
+      <motion.div className="al-graph-scan" animate={reduceMotion ? undefined : { x: ["-5%", "103%"] }} transition={{ duration: 6, repeat: Infinity, ease: "linear" }} />
+      <div className="al-graph-times"><span>12:00</span><span>12:20</span><span>12:40</span><span>13:00</span></div>
+    </div>
+  );
+}
+
+function HeroConsole() {
+  const reduceMotion = useReducedMotion();
+  const px = useMotionValue(0);
+  const py = useMotionValue(0);
+  const sx = useSpring(px, { stiffness: 110, damping: 18, mass: 0.5 });
+  const sy = useSpring(py, { stiffness: 110, damping: 18, mass: 0.5 });
+  const rotateX = useTransform(sy, [-0.5, 0.5], [3.2, -3.2]);
+  const rotateY = useTransform(sx, [-0.5, 0.5], [-4.5, 4.5]);
+  const cardX = useTransform(sx, [-0.5, 0.5], [-12, 12]);
+  const cardY = useTransform(sy, [-0.5, 0.5], [-8, 8]);
+  const inverseCardX = useTransform(cardX, value => -value);
+  const inverseCardY = useTransform(cardY, value => -value);
+
+  return (
+    <div className="al-console-stage" onPointerMove={(event) => { if (reduceMotion) return; const rect = event.currentTarget.getBoundingClientRect(); px.set((event.clientX - rect.left) / rect.width - 0.5); py.set((event.clientY - rect.top) / rect.height - 0.5); }} onPointerLeave={() => { px.set(0); py.set(0); }}>
+      <div className="al-orbit al-orbit-one" /><div className="al-orbit al-orbit-two" />
+      <motion.div className="al-console-perspective" style={reduceMotion ? undefined : { rotateX, rotateY }} initial={reduceMotion ? false : { opacity: 0, y: 45, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 1.1, delay: 0.3, ease }}>
+        <div className="al-console">
+          <div className="al-console-bar"><div className="al-window"><i /><i /><i /><span>agentlens / production</span></div><span className="al-live"><i /> LIVE</span></div>
+          <div className="al-console-heading"><div><Eyebrow>INCIDENT 412</Eyebrow><h2>Provider degradation</h2></div><span className="al-time-range"><Clock3 size={13} /> Last 60 min</span></div>
+          <div className="al-console-metrics"><div><span>Success rate</span><strong>61.2%</strong><small className="danger">↓ 37.2%</small></div><div><span>p95 latency</span><strong>2.8s</strong><small className="danger">3.1× slower</small></div><div><span>Calls observed</span><strong>12,402</strong><small>live sample</small></div></div>
+          <SignalGraph />
+          <div className="al-console-foot"><span><ShieldCheck size={13} /> No prompt content collected</span><span>Updated 4s ago</span></div>
+        </div>
+      </motion.div>
+      <motion.div className="al-float al-float-cause" style={reduceMotion ? undefined : { x: cardX, y: cardY }}><span className="al-float-icon danger"><CircleAlert size={15} /></span><div><small>Likely root cause</small><b>Provider rate limiting</b><span>Confidence 94%</span></div></motion.div>
+      <motion.div className="al-float al-float-route" style={reduceMotion ? undefined : { x: inverseCardX, y: inverseCardY }}><span className="al-float-icon success"><GitBranch size={15} /></span><div><small>Safest route now</small><b>Switch to Anthropic</b><span>99.1% success · 410ms</span></div><ChevronRight size={16} /></motion.div>
+    </div>
+  );
+}
+
+function Marquee() {
+  const items = ["OPENAI", "ANTHROPIC", "GROQ", "GEMINI", "MISTRAL", "AZURE AI"];
+  return <div className="al-marquee" aria-label="Supported providers"><div className="al-marquee-track">{[...items, ...items].map((item, index) => <span key={`${item}-${index}`}><i />{item}</span>)}</div></div>;
+}
+
+function IncidentStory() {
+  const events = [["12:41", "Baseline normal", "normal"], ["12:44", "Latency begins rising", "warning"], ["12:46", "Success rate drops", "danger"], ["12:47", "AgentLens opens incident", "danger"], ["12:48", "Safer route recommended", "success"]] as const;
+  return <div className="al-incident-story"><div className="al-story-rail">{events.map(([time, label, tone], index) => <motion.div className={`al-story-event ${tone}`} key={time} initial={{ opacity: 0.3 }} whileInView={{ opacity: 1 }} viewport={{ once: true, margin: "-35% 0px -35% 0px" }} transition={{ duration: 0.5, delay: index * 0.08 }}><time>{time}</time><span className="al-story-node" /><p>{label}</p></motion.div>)}</div><motion.div className="al-story-answer" whileHover={{ rotate: -0.6, y: -5 }} transition={{ type: "spring", stiffness: 220, damping: 18 }}><div className="al-story-answer-top"><span><Sparkles size={14} /> AGENTLENS ANSWER</span><span className="al-chip success">Ready</span></div><h3>Route new traffic to Anthropic.</h3><p>OpenAI is rate limiting this workload. Anthropic is handling a matching request profile at 99.1% success with normal latency.</p><div className="al-evidence"><span><b>94%</b> root-cause confidence</span><span><b>12,402</b> calls compared</span></div><button>Open incident <ArrowDownRight size={15} /></button></motion.div></div>;
+}
+
+function Workflow() {
+  return <div className="al-workflow"><motion.div className="al-workflow-progress" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, margin: "-20%" }} transition={{ duration: 1.5, ease }} />{workflow.map(({ number, title, body, icon: Icon }, index) => <motion.article key={number} className="al-workflow-step" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-12%" }} transition={{ duration: 0.65, delay: index * 0.1, ease }} whileHover="hover"><div className="al-workflow-icon"><Icon size={18} /><motion.span variants={{ hover: { scale: 1.7, opacity: 0 } }} /></div><span className="al-workflow-number">{number}</span><h3>{title}</h3><p>{body}</p></motion.article>)}</div>;
+}
+
+function ProviderMatrix() {
+  return <div className="al-provider-matrix"><div className="al-matrix-head"><span>Provider</span><span>Reliability</span><span>Latency</span><span>Decision</span></div>{providers.map((provider, index) => <motion.div className="al-matrix-row" key={provider.name} initial={{ opacity: 0, x: -18 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: index * 0.08, ease }}><strong><i className={provider.tone} />{provider.name}</strong><div className="al-reliability"><span><i className={provider.tone} style={{ width: `${provider.score}%` }} /></span><b>{provider.score}%</b></div><span>{provider.latency}</span><em className={provider.tone}>{provider.status}</em></motion.div>)}<div className="al-matrix-scan" /></div>;
+}
+
+function PublicSite() {
   const router = useRouter();
+  const pageRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 110, damping: 25, restDelta: 0.001 });
   const goSignup = () => router.push("/signup");
-  return <main className="public-page">
-    <div className="public-shell">
-      <header className="public-nav"><a href="#top" className="public-brand"><span><Radar size={17} /></span>AgentLens</a><nav><a href="#product">Product</a><a href="#how-it-works">How it works</a><a href="#pricing">Pricing</a><a href="#docs">Docs</a></nav><div className="public-nav-actions"><a className="github-link" href="https://github.com/imranrkhan13/agentlens" target="_blank" rel="noreferrer"><Github size={15} /> GitHub</a><button className="nav-cta" onClick={goSignup}>Start monitoring</button></div></header>
 
-      <section id="top" className="public-hero"><div className="hero-copy"><SectionLabel>AI RELIABILITY INFRASTRUCTURE</SectionLabel><h1>Know your AI system<br /><i>is failing before</i><br />your users do.</h1><p>AgentLens watches every real call your application makes to OpenAI, Anthropic, Groq, Gemini, and more—then tells you what changed, why it happened, and what to do next.</p><div className="hero-actions"><PrimaryButton onClick={goSignup}>Start monitoring</PrimaryButton><a href="https://github.com/imranrkhan13/agentlens" target="_blank" rel="noreferrer" className="public-button public-button-secondary"><Github size={16} /> View on GitHub</a></div><div className="trust-row"><span><CircleCheck size={14} /> Open source</span><span><ActivityIcon /> Production telemetry</span><span><Globe2 size={14} /> Multi-provider</span><span><Zap size={14} /> Real-time alerts</span></div></div><HeroSignalBoard /></section>
+  return <main className="al-page" ref={pageRef}>
+    <motion.div className="al-scroll-progress" style={{ scaleX: progress }} />
+    <div className="al-shell">
+      <header className="al-nav"><a href="#top" className="al-brand"><span><Radar size={18} /></span>AgentLens</a><nav><a href="#product">Product</a><a href="#workflow">How it works</a><a href="#comparison">Providers</a><a href="#pricing">Pricing</a></nav><div className="al-nav-actions"><a href={githubUrl} target="_blank" rel="noreferrer"><Github size={15} /> GitHub</a><button onClick={goSignup}>Start monitoring <ArrowRight size={14} /></button></div></header>
 
-      <section id="product" className="visual-section"><div className="section-intro"><div><SectionLabel>SEE THE SIGNAL</SectionLabel><h2>When production gets weird,<br /><i>AgentLens gets specific.</i></h2></div><p>One place to see the incident, understand the cause, and choose the safest next move—without stitching together six dashboards.</p></div><ProductVisual /></section>
+      <section className="al-hero" id="top"><div className="al-hero-copy"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05, duration: 0.6 }}><Eyebrow>RELIABILITY FOR PRODUCTION AI</Eyebrow></motion.div><AnimatedHeadline /><motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.8, ease }}>AgentLens watches every real model call, finds meaningful failures, explains the cause, and recommends the safest next move.</motion.p><motion.div className="al-hero-actions" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.68, duration: 0.8, ease }}><MagneticButton onClick={goSignup}>Start monitoring free</MagneticButton><a className="al-text-link" href={githubUrl} target="_blank" rel="noreferrer"><Github size={16} /> Explore the source <ArrowRight size={14} /></a></motion.div><motion.div className="al-trust" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.7 }}><span><CircleCheck size={14} /> Open source</span><span><LockKeyhole size={14} /> No prompt storage</span><span><Zap size={14} /> Setup in minutes</span></motion.div></div><HeroConsole /></section>
 
-      <section className="problem-section"><div className="problem-copy"><SectionLabel>THE PROBLEM</SectionLabel><h2>Your AI app goes live.<br />Something breaks.<br /><i>Customers notice first.</i></h2><p>AI failures are rarely one clean error. They are a slow provider, rising retries, a cost spike, or a change nobody connected to an incident.</p></div><div className="comparison"><div className="comparison-panel comparison-without"><span className="comparison-label">WITHOUT AGENTLENS</span><div className="comparison-stack"><span>Support ticket</span><b>↓</b><span>Grafana</span><b>↓</b><span>Raw logs</span><b>↓</b><span>Provider dashboard</span></div><strong>45 minutes later</strong><small>Still investigating.</small></div><div className="comparison-panel comparison-with"><span className="comparison-label">WITH AGENTLENS</span><div className="answer-callout"><MiniStatus tone="bad">Incident detected · 4 min ago</MiniStatus><strong>OpenAI success rate dropped to 61%.</strong><span>Root cause: <b>Rate limiting</b></span><span>Recommended: <b>Route to Claude</b></span></div><strong className="answer-time">Time to answer: &lt; 60 seconds</strong></div></div></section>
+      <Marquee />
+      <section className="al-proof-strip"><Reveal><strong>12.4M</strong><span>AI calls observed</span></Reveal><Reveal delay={0.08}><strong>&lt;60s</strong><span>to a useful answer</span></Reveal><Reveal delay={0.16}><strong>6+</strong><span>model providers</span></Reveal><Reveal delay={0.24}><strong>0</strong><span>prompt content retained</span></Reveal></section>
 
-      <section id="how-it-works" className="workflow-section"><div className="section-intro centered-intro"><SectionLabel>HOW IT WORKS</SectionLabel><h2>From install to resolution,<br /><i>automatically.</i></h2><p>One guided path from your first request to a clear fix.</p></div><div className="workflow-line">{workflow.map(([number, title, desc], index) => <div className="workflow-step" key={number}><div className="workflow-number">{number}</div><div className="workflow-node" /><h3>{title}</h3><p>{desc}</p>{index < workflow.length - 1 && <span className="workflow-arrow">→</span>}</div>)}</div><div className="install-strip"><div className="install-icon"><Terminal size={18} /></div><div><span>Start with one command</span><code>npm install agentlens</code></div><p>Then import <code>agentlens/register</code> once at server startup.</p><button onClick={() => navigator.clipboard?.writeText("npm install agentlens")}><Copy size={14} /> Copy</button></div></section>
+      <section className="al-section al-incident-section" id="product"><Reveal className="al-section-heading"><div><Eyebrow>FROM SIGNAL TO ANSWER</Eyebrow><h2>Not another dashboard.<br /><em>A decision, with evidence.</em></h2></div><p>AgentLens turns scattered provider behavior into one clear incident story: what changed, why it matters, and what your team should do next.</p></Reveal><Reveal delay={0.08}><IncidentStory /></Reveal></section>
 
-      <section className="bento-section"><div className="section-intro"><div><SectionLabel>THE TOOLKIT</SectionLabel><h2>Everything you need<br /><i>when production gets weird.</i></h2></div><p>Less guessing. More evidence. Every surface points back to the telemetry your application actually produced.</p></div><div className="bento-grid"><div className="bento-card bento-large"><div className="bento-card-head"><div><span className="public-kicker">INCIDENT INTELLIGENCE</span><h3>A timeline you can act on.</h3></div><GitBranch size={20} /></div><div className="mini-timeline"><span /><span /><span className="active" /><span className="active" /><span className="active" /></div><div className="mini-event"><b>12:47</b><span className="timeline-dot bad" />Success rate dropped</div><div className="mini-event"><b>12:48</b><span className="timeline-dot good" />GitHub issue created automatically</div><a href="#product" className="text-link">Explore an incident <ArrowRight size={14} /></a></div><div className="bento-card provider-bento"><span className="public-kicker">PROVIDER HEALTH</span><h3>See who is working<br />for your app.</h3>{providers.slice(0, 3).map((p) => <div className="bento-provider" key={p.name}><span>{p.name}</span><div className="provider-bar"><i className={p.tone} style={{ width: p.value }} /></div><b>{p.value}</b></div>)}</div><div className="bento-card prompt-bento"><span className="public-kicker">INVESTIGATION PROMPT</span><h3>From alert to<br />useful question.</h3><div className="prompt-preview"><span>Investigate a production degradation affecting</span><b>OpenAI / gpt-4o.</b><span>Observed: success rate fell from 98.4% to 61.2%...</span><div className="prompt-cursor" /></div><a href="#investigation" className="text-link">See the prompt <ArrowRight size={14} /></a></div><div className="bento-card alerts-bento"><span className="public-kicker">AUTOMATIC ALERTS</span><h3>Put the right context<br />where your team works.</h3><div className="integration-pills"><span><MessageSquare size={15} /> Slack</span><span><Github size={15} /> GitHub</span><span><Webhook size={15} /> Webhook</span></div><p>Incident #412 · OpenAI success rate dropped to 61%.</p></div><div className="bento-card trend-bento"><span className="public-kicker">WEEKLY RELIABILITY</span><h3>Know the direction,<br />not just the moment.</h3><div className="trend-chart"><i /><i /><i /><i /><i /><i /><i /><i /><i /></div><div className="trend-foot"><b>94.2%</b><span>+6.4% this week</span></div></div></div></section>
+      <section className="al-dark-section"><Reveal className="al-dark-intro"><Eyebrow>THE DIFFERENCE</Eyebrow><h2>Your support inbox should never be your monitoring system.</h2></Reveal><div className="al-compare"><Reveal className="al-compare-before"><span className="al-compare-label">WITHOUT AGENTLENS</span><div className="al-chaos-stack"><span>Customer complaint</span><i /><span>Provider dashboard</span><i /><span>Raw logs</span><i /><span>Guess the cause</span></div><footer><Clock3 size={16} /><div><b>45 minutes later</b><span>Still investigating.</span></div></footer></Reveal><Reveal className="al-compare-after" delay={0.12}><span className="al-compare-label">WITH AGENTLENS</span><div className="al-answer-stack"><span className="al-chip danger"><i /> Incident detected</span><h3>OpenAI success fell to 61%.</h3><p><span>Root cause</span><b>Rate limiting</b></p><p><span>Safest action</span><b>Route to Anthropic</b></p></div><footer><CircleCheck size={16} /><div><b>Answer in under 60 seconds</b><span>With evidence attached.</span></div></footer></Reveal></div></section>
 
-      <section className="dashboard-section"><div className="section-intro"><div><SectionLabel>REAL-TIME DASHBOARD</SectionLabel><h2>Your production AI,<br /><i>as it actually behaves.</i></h2></div><div className="illustrative-note"><span>Illustrative example</span><p>Real dashboards use your production telemetry.</p></div></div><div className="dashboard-mock"><div className="dashboard-mock-top"><div><span className="public-kicker">OVERVIEW</span><h3>Customer support assistant</h3></div><MiniStatus tone="good">Receiving traffic</MiniStatus></div><div className="dashboard-metrics"><div><span>AI conversations</span><b>12,402</b><small>+18.4% this week</small></div><div><span>Answers delivered</span><b>94.2%</b><small>Requests completed</small></div><div><span>Typical response</span><b>Very fast</b><small>420ms average</small></div><div><span>AI spend</span><b>$12.40</b><small>Last 24 hours</small></div><div><span>Needs attention</span><b className="red-text">3</b><small>Open incidents</small></div></div><div className="dashboard-lower"><div className="chart-panel"><div className="panel-title"><span>Response time</span><span className="muted-small">Last 24 hours</span></div><div className="line-chart"><div className="chart-grid" /><svg viewBox="0 0 600 160" preserveAspectRatio="none" aria-label="Illustrative response time chart"><path d="M0 118 C42 112 58 125 92 105 S145 84 178 108 S222 128 250 90 S298 62 330 82 S378 74 408 92 S450 96 480 52 S535 71 600 28" fill="none" stroke="#c88727" strokeWidth="3" vectorEffect="non-scaling-stroke" /></svg></div><div className="chart-labels"><span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>Now</span></div></div><div className="health-panel"><div className="panel-title"><span>AI services</span><span className="muted-small">Status now</span></div>{providers.map((p) => <div className="health-row" key={p.name}><span className={`health-dot ${p.tone}`} /><b>{p.name}</b><span>{p.label}</span><strong>{p.value}</strong></div>)}</div></div></div></section>
+      <section className="al-section" id="workflow"><Reveal className="al-section-heading al-section-heading-center"><div><Eyebrow>HOW IT WORKS</Eyebrow><h2>Install once.<br /><em>Understand every incident.</em></h2></div><p>A single path from production traffic to a confident response—without replacing the stack you already use.</p></Reveal><Workflow /><Reveal className="al-install-band"><span><Terminal size={17} /> Install AgentLens</span><code>npm install agentlens</code><button onClick={() => navigator.clipboard?.writeText("npm install agentlens")}><Copy size={14} /> Copy</button></Reveal></section>
 
-      <section className="provider-section"><div className="section-intro centered-intro"><SectionLabel>PROVIDER COMPARISON</SectionLabel><h2>Every provider says it is fine.<br /><i>We show what your app experienced.</i></h2></div><div className="provider-matrix"><div className="matrix-head"><span>Provider</span><span>Reliability</span><span>Latency</span><span>Recommendation</span></div>{providers.map((p) => <div className="matrix-row" key={p.name}><b>{p.name}</b><div className="matrix-score"><span className={`health-dot ${p.tone}`} />{p.value}</div><div className="matrix-bar"><i className={p.tone} style={{ width: p.value }} /></div><span className={`matrix-tag ${p.tone}`}>{p.label}</span></div>)}</div></section>
+      <section className="al-section al-feature-section"><Reveal className="al-section-heading"><div><Eyebrow>BUILT FOR THE INCIDENT</Eyebrow><h2>Every view moves the<br /><em>investigation forward.</em></h2></div><p>Hover and explore: each surface reveals the evidence behind the recommendation instead of hiding it behind decoration.</p></Reveal><div className="al-feature-stories"><Reveal className="al-feature-story al-feature-story-wide"><div className="al-feature-copy"><span>01 / INCIDENT INTELLIGENCE</span><h3>A timeline that reconstructs what happened.</h3><p>Changes are ordered, correlated, and attached to the provider, model, release, and route that produced them.</p><a href="#product">Explore an incident <ArrowRight size={14} /></a></div><div className="al-mini-timeline">{["Baseline", "Latency", "Retries", "Detected", "Alerted"].map((label, i) => <div key={label} className={i > 1 ? "active" : ""}><span>{`12:${41 + i * 2}`}</span><i /><b>{label}</b></div>)}</div></Reveal><Reveal className="al-feature-story" delay={0.08}><div className="al-feature-copy"><span>02 / AUTOMATIC ALERTS</span><h3>Context arrives where your team works.</h3><p>No “something is wrong” alerts. Every notification carries the signal, cause, and next step.</p></div><div className="al-alert-stack"><div><MessageSquare size={16} /><p><b>#production-ai</b><span>OpenAI success fell to 61%.</span></p><small>now</small></div><div><Github size={16} /><p><b>Issue #412 created</b><span>Investigation context attached.</span></p><small>4s</small></div><div><Webhook size={16} /><p><b>Webhook delivered</b><span>200 OK · 84ms</span></p><small>5s</small></div></div></Reveal><Reveal className="al-feature-story" delay={0.14}><div className="al-feature-copy"><span>03 / INVESTIGATION PROMPT</span><h3>Give your engineer a useful starting point.</h3><p>AgentLens packages the important evidence into a ready-to-use investigation prompt.</p></div><div className="al-prompt-window"><div><i /><i /><i /><span>investigate.md</span></div><p>Investigate a production degradation affecting <b>OpenAI / gpt-4o</b>.</p><p>Observed: success rate fell from <mark>98.4% to 61.2%</mark>...</p><span className="al-type-cursor" /></div></Reveal></div></section>
 
-      <section id="investigation" className="investigation-section"><div className="investigation-copy"><SectionLabel>INVESTIGATION WORKFLOW</SectionLabel><h2>From alert to fix<br /><i>without 20 minutes of digging.</i></h2><p>AgentLens turns an incident into a useful question your engineer can answer, with the evidence already attached.</p><div className="lifecycle">{["Detected", "Explained", "Prompt ready", "Investigated", "Resolved"].map((step, i) => <div key={step}><span className={i < 2 ? "done" : ""}>{i < 2 ? <Check size={12} /> : i + 1}</span><b>{step}</b>{i < 4 && <i />}</div>)}</div></div><div className="prompt-card"><div className="prompt-card-top"><span><ScanSearch size={15} /> INVESTIGATION PROMPT</span><button><Copy size={14} /> Copy prompt</button></div><h3>Investigate a production degradation affecting OpenAI / gpt-4o.</h3><p>Observed:</p><ul><li>success rate fell from 98.4% to 61.2%</li><li>p95 latency increased 3.1x</li><li>retry rate increased at 12:44 UTC</li><li>Claude remained at 99.1%</li></ul><p>Determine likely root cause and recommend the safest mitigation.</p></div></section>
+      <section className="al-section al-provider-section" id="comparison"><Reveal className="al-section-heading"><div><Eyebrow>PROVIDER INTELLIGENCE</Eyebrow><h2>Every provider says it is fine.<br /><em>We show what your app felt.</em></h2></div><p>Reliability is measured from your real request profile, geography, models, and traffic—not a generic status page.</p></Reveal><Reveal delay={0.08}><ProviderMatrix /></Reveal></section>
 
-      <section className="integrations-section"><div><SectionLabel>ALERT INTEGRATIONS</SectionLabel><h2>The right context,<br /><i>in the right place.</i></h2></div><div className="integration-feed"><div className="feed-item"><span className="feed-icon github"><Github size={18} /></span><div><b>GitHub</b><p>Incident #412 · Automatically created</p></div><span className="feed-ok">Created</span></div><div className="feed-item"><span className="feed-icon slack"><MessageSquare size={18} /></span><div><b>Slack · #production-ai</b><p>OpenAI success rate dropped to 61%.</p></div><span className="feed-time">12:47</span></div><div className="feed-item"><span className="feed-icon webhook"><Webhook size={18} /></span><div><b>Webhook</b><p>POST <strong>200 OK</strong> · 84ms</p></div><span className="feed-ok">Delivered</span></div></div></section>
+      <section className="al-section al-investigation"><Reveal className="al-investigation-copy"><Eyebrow>EXPLAINABLE BY DEFAULT</Eyebrow><h2>The recommendation is only useful if you can trust it.</h2><p>Every answer links back to the observations that produced it. No opaque reliability score and no hidden prompt content.</p><ul><li><Check size={14} /> Production telemetry only</li><li><Check size={14} /> Evidence attached to every conclusion</li><li><Check size={14} /> Provider-neutral recommendations</li></ul></Reveal><Reveal className="al-investigation-card" delay={0.1}><div className="al-investigation-top"><span><ScanSearch size={15} /> INVESTIGATION / 412</span><span className="al-chip success">94% confidence</span></div><h3>Why did success rate fall?</h3><div className="al-reasoning"><div className="done"><span>1</span><p><b>Request volume</b><small>Normal · not causal</small></p></div><div className="done"><span>2</span><p><b>Application release</b><small>No changes in window</small></p></div><div className="active"><span>3</span><p><b>Provider response codes</b><small>429 responses increased 8.6×</small></p></div><div><span>4</span><p><b>Conclusion</b><small>Rate limiting is the likely cause</small></p></div></div><button>Copy full investigation <Copy size={14} /></button></Reveal></section>
 
-      <section id="docs" className="opensource-section"><div className="open-source-mark"><Code2 size={26} /></div><div><SectionLabel>OPEN SOURCE</SectionLabel><h2>Open tooling.<br /><i>Inspectable reasoning.</i></h2><p>Recommendations trace back to real telemetry—not opaque scoring. Bring your own providers, inspect the signal, and keep your data in your stack.</p><div className="sdk-row"><span><Terminal size={15} /> Python</span><span><Code2 size={15} /> TypeScript</span><span><Server size={15} /> Self-hostable</span></div><div className="hero-actions"><a className="public-button public-button-secondary" href="https://github.com/imranrkhan13/agentlens" target="_blank" rel="noreferrer"><Github size={16} /> Star on GitHub</a><a className="text-link" href="https://github.com/imranrkhan13/agentlens" target="_blank" rel="noreferrer">Read the docs <ArrowRight size={14} /></a></div></div></section>
+      <section className="al-section al-open-source"><Reveal className="al-code-mark"><Code2 size={30} /></Reveal><Reveal className="al-open-copy" delay={0.05}><Eyebrow>OPEN SOURCE</Eyebrow><h2>Your reliability layer<br />should not be a black box.</h2><p>Inspect the collection path, run the stack yourself, and keep ownership of your operational data.</p><div><span><Code2 size={15} /> TypeScript</span><span><Terminal size={15} /> Python</span><span><Server size={15} /> Self-hostable</span><span><Globe2 size={15} /> Multi-provider</span></div><a href={githubUrl} target="_blank" rel="noreferrer">Explore AgentLens on GitHub <ArrowRight size={15} /></a></Reveal></section>
 
-      <section id="pricing" className="pricing-section"><div className="section-intro centered-intro"><SectionLabel>PRICING</SectionLabel><h2>Start with clarity.<br /><i>Scale with confidence.</i></h2></div><div className="pricing-grid"><div className="price-card"><span className="public-kicker">DEVELOPER</span><h3>Free</h3><p>For exploring your first production signal.</p><ul><li><Check size={14} /> 1 project</li><li><Check size={14} /> 7-day incident history</li><li><Check size={14} /> Webhook alerts</li><li><Check size={14} /> Community support</li></ul><button onClick={goSignup}>Start free <ArrowRight size={14} /></button></div><div className="price-card price-card-featured"><span className="price-ribbon">Most useful</span><span className="public-kicker">TEAM</span><h3>Contact us</h3><p>For teams who want incidents handled with context.</p><ul><li><Check size={14} /> Unlimited projects</li><li><Check size={14} /> GitHub automation</li><li><Check size={14} /> 90-day history</li><li><Check size={14} /> Slack alerts and reports</li></ul><button onClick={goSignup}>Get in touch <ArrowRight size={14} /></button></div><div className="price-card"><span className="public-kicker">ENTERPRISE</span><h3>Contact us</h3><p>For teams with security and retention requirements.</p><ul><li><Check size={14} /> Self-hosted deployment</li><li><Check size={14} /> SSO</li><li><Check size={14} /> Custom retention</li><li><Check size={14} /> Dedicated support</li></ul><button onClick={goSignup}>Contact sales <ArrowRight size={14} /></button></div></div></section>
+      <section className="al-section al-pricing" id="pricing"><Reveal className="al-section-heading al-section-heading-center"><div><Eyebrow>SIMPLE PRICING</Eyebrow><h2>Start with the signal.<br /><em>Scale when it matters.</em></h2></div><p>No credit card required for your first production project.</p></Reveal><div className="al-pricing-grid"><Reveal className="al-price-card"><span>DEVELOPER</span><h3>Free</h3><p>For your first production AI project.</p><ul><li><Check size={14} /> 1 project</li><li><Check size={14} /> 7-day history</li><li><Check size={14} /> Webhook alerts</li></ul><button onClick={goSignup}>Start free <ArrowRight size={14} /></button></Reveal><Reveal className="al-price-card al-price-featured" delay={0.08}><span>TEAM <em>RECOMMENDED</em></span><h3>Let&apos;s talk</h3><p>For teams operating critical AI workflows.</p><ul><li><Check size={14} /> Unlimited projects</li><li><Check size={14} /> GitHub + Slack automation</li><li><Check size={14} /> 90-day history</li></ul><button onClick={goSignup}>Contact us <ArrowRight size={14} /></button></Reveal><Reveal className="al-price-card" delay={0.16}><span>ENTERPRISE</span><h3>Custom</h3><p>For security and retention requirements.</p><ul><li><Check size={14} /> Self-hosted deployment</li><li><Check size={14} /> SSO and audit controls</li><li><Check size={14} /> Dedicated support</li></ul><button onClick={goSignup}>Contact sales <ArrowRight size={14} /></button></Reveal></div></section>
 
-      <section className="final-cta"><div><SectionLabel>KEEP YOUR USERS OUT OF THE INCIDENT</SectionLabel><h2>Don&apos;t wait for customers<br />to tell you your AI is broken.</h2><p>Monitor real production AI behavior and know what changed before your support inbox does.</p></div><div className="final-actions"><PrimaryButton onClick={goSignup}>Start monitoring</PrimaryButton><a href="https://github.com/imranrkhan13/agentlens" target="_blank" rel="noreferrer" className="text-link">View on GitHub <ArrowRight size={14} /></a><small>Open source · Setup in minutes</small></div></section>
+      <section className="al-final-cta"><motion.div className="al-cta-orbit" animate={{ rotate: 360 }} transition={{ duration: 32, repeat: Infinity, ease: "linear" }} /><Reveal><Eyebrow>SEE IT BEFORE THEY DO</Eyebrow><h2>Your next AI incident<br />already has an answer.</h2><p>Start monitoring real production behavior in minutes.</p></Reveal><Reveal className="al-final-actions" delay={0.1}><MagneticButton onClick={goSignup}>Start monitoring free</MagneticButton><a href={githubUrl} target="_blank" rel="noreferrer">View source <ArrowRight size={14} /></a></Reveal></section>
 
-      <footer className="public-footer"><a href="#top" className="public-brand"><span><Radar size={16} /></span>AgentLens</a><p>Reliability infrastructure for production AI applications.</p><div className="footer-links"><a href="#product">Product</a><a href="#docs">Documentation</a><a href="https://github.com/imranrkhan13/agentlens" target="_blank" rel="noreferrer">GitHub</a><a href="#pricing">Pricing</a></div><small>© {new Date().getFullYear()} AgentLens</small></footer>
+      <footer className="al-footer"><div><a href="#top" className="al-brand"><span><Radar size={18} /></span>AgentLens</a><p>Reliability infrastructure for production AI applications.</p></div><div><span>PRODUCT</span><a href="#product">Incidents</a><a href="#comparison">Providers</a><a href="#pricing">Pricing</a></div><div><span>DEVELOPERS</span><a href={githubUrl}>GitHub</a><a href={githubUrl}>Documentation</a><a href={githubUrl}>Self-hosting</a></div><small>© {new Date().getFullYear()} AgentLens</small></footer>
     </div>
   </main>;
 }
 
-function ActivityIcon() { return <span className="activity-icon" aria-hidden="true"><i /><i /><i /></span>; }
+export default PublicSite;
