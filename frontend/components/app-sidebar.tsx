@@ -20,9 +20,9 @@ function NavLink({ href, label, icon: Icon, onNavigate }: (typeof navigation)[nu
   const pathname = usePathname();
   const isActive = pathname === href || (href === "/app/projects" && pathname.startsWith("/app/projects/"));
   return (
-    <Link onClick={onNavigate} href={href} className={cn("group relative flex h-10 items-center gap-3 rounded-xl px-3 text-sm transition", isActive ? "bg-white/[.075] text-white" : "text-[#9796a6] hover:bg-white/[.04] hover:text-[#e9e8f0]")}> 
-      {isActive && <motion.span layoutId="side-active" className="absolute inset-y-2 left-0 w-0.5 rounded-full bg-gradient-to-b from-violet to-cyan" />}
-      <Icon className={cn("size-4", isActive ? "text-violet" : "text-[#777686] group-hover:text-[#aaa9b6]")} strokeWidth={1.8} aria-hidden="true" />
+    <Link onClick={onNavigate} href={href} className={cn("workspace-nav-link group relative flex h-11 items-center gap-3 rounded-xl px-3 text-sm transition", isActive ? "is-active bg-white/[.08] text-white" : "text-[#a4a89d] hover:bg-white/[.045] hover:text-white")}>
+      {isActive && <motion.span layoutId="side-active" className="absolute inset-y-2.5 left-0 w-0.5 rounded-full bg-[#d9ff57]" />}
+      <Icon className={cn("size-4", isActive ? "text-[#d9ff57]" : "text-[#74796d] group-hover:text-[#c7cbbf]")} strokeWidth={1.8} aria-hidden="true" />
       <span>{label}</span>
     </Link>
   );
@@ -36,28 +36,28 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex h-[76px] items-center border-b border-white/[.07] px-5"><Brand /></div>
+      <div className="workspace-sidebar-brand flex h-[76px] items-center border-b border-white/[.07] px-5"><Brand /></div>
       <div className="flex-1 px-3 py-5">
-        <p className="px-3 text-[10px] font-semibold uppercase tracking-[.16em] text-[#5e5d6c]">Your AI app</p>
+        <p className="px-3 text-[9px] font-semibold uppercase tracking-[.18em] text-[#656a5f]">Your AI app</p>
         <nav className="mt-3 space-y-1">{navigation.map((item) => <NavLink key={item.href} {...item} onNavigate={onNavigate} />)}</nav>
-        <div className="mt-7 px-3"><p className="text-[10px] font-semibold uppercase tracking-[.16em] text-[#5e5d6c]">Account</p></div>
-        <Link onClick={onNavigate} href="/app/settings" className={cn("mt-3 flex h-10 items-center gap-3 rounded-xl px-3 text-sm transition", isSettings ? "bg-white/[.075] text-white" : "text-[#9796a6] hover:bg-white/[.04] hover:text-[#e9e8f0]")}>
-          <Settings2 className={cn("size-4", isSettings ? "text-violet" : "text-[#777686]")} strokeWidth={1.8} aria-hidden="true" /> Setup & settings
+        <div className="mt-7 px-3"><p className="text-[9px] font-semibold uppercase tracking-[.18em] text-[#656a5f]">Account</p></div>
+        <Link onClick={onNavigate} href="/app/settings" className={cn("workspace-nav-link mt-3 flex h-11 items-center gap-3 rounded-xl px-3 text-sm transition", isSettings ? "is-active bg-white/[.08] text-white" : "text-[#a4a89d] hover:bg-white/[.045] hover:text-white")}>
+          <Settings2 className={cn("size-4", isSettings ? "text-[#d9ff57]" : "text-[#74796d]")} strokeWidth={1.8} aria-hidden="true" /> Setup & settings
         </Link>
-        <Link onClick={onNavigate} href="/app/diagnostics" className={cn("mt-1 flex h-10 items-center gap-3 rounded-xl px-3 text-sm transition", pathname === "/app/diagnostics" ? "bg-white/[.075] text-white" : "text-[#9796a6] hover:bg-white/[.04] hover:text-[#e9e8f0]")}>
-          <Stethoscope className={cn("size-4", pathname === "/app/diagnostics" ? "text-violet" : "text-[#777686]")} strokeWidth={1.8} aria-hidden="true" /> Connection help
+        <Link onClick={onNavigate} href="/app/diagnostics" className={cn("workspace-nav-link mt-1 flex h-11 items-center gap-3 rounded-xl px-3 text-sm transition", pathname === "/app/diagnostics" ? "is-active bg-white/[.08] text-white" : "text-[#a4a89d] hover:bg-white/[.045] hover:text-white")}>
+          <Stethoscope className={cn("size-4", pathname === "/app/diagnostics" ? "text-[#d9ff57]" : "text-[#74796d]")} strokeWidth={1.8} aria-hidden="true" /> Connection help
         </Link>
       </div>
-      <div className="mx-3 mb-3 rounded-2xl border border-white/[.08] bg-black/20 p-3">
-        <div className="flex items-center gap-2.5"><span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-violet/70 to-cyan/70 text-xs font-semibold text-white">{session?.projectName?.slice(0, 1).toUpperCase() || "A"}</span><div className="min-w-0"><p className="truncate text-xs font-medium text-[#e9e8f0]">{session?.projectName || "Choose a project"}</p><p className="truncate text-[10px] text-[#737280]">{verified ? "Ready to watch" : session ? "Needs a quick check" : "Start in a few minutes"}</p></div></div>
-        <Link onClick={onNavigate} href={session && !verified ? "/app/diagnostics" : "/app/settings"} className="mt-3 flex items-center justify-between text-[11px] text-[#9796a7] transition hover:text-white">{session && !verified ? "Fix connection" : "Manage projects"} <ChevronRight className="size-3" aria-hidden="true" /></Link>
+      <div className="workspace-project-card mx-3 mb-3 rounded-2xl border border-white/[.09] bg-white/[.045] p-3">
+        <div className="flex items-center gap-2.5"><span className="grid size-8 place-items-center rounded-lg bg-[#d9ff57] text-xs font-semibold text-[#1b1d18]">{session?.projectName?.slice(0, 1).toUpperCase() || "A"}</span><div className="min-w-0"><p className="truncate text-xs font-medium text-[#eff1e9]">{session?.projectName || "Choose a project"}</p><p className="truncate text-[10px] text-[#777c70]">{verified ? "Ready to watch" : session ? "Needs a quick check" : "Start in a few minutes"}</p></div></div>
+        <Link onClick={onNavigate} href={session && !verified ? "/app/diagnostics" : "/app/settings"} className="mt-3 flex items-center justify-between text-[11px] text-[#a1a69a] transition hover:text-[#d9ff57]">{session && !verified ? "Fix connection" : "Manage projects"} <ChevronRight className="size-3" aria-hidden="true" /></Link>
       </div>
     </div>
   );
 }
 
 export function AppSidebar() {
-  return <aside className="fixed inset-y-0 left-0 z-30 hidden w-[240px] border-r border-white/[.075] bg-[#0b0c10]/90 backdrop-blur-xl lg:block"><SidebarContent /></aside>;
+  return <aside className="workspace-sidebar fixed inset-y-0 left-0 z-30 hidden w-[252px] border-r border-white/[.075] bg-[#171914]/95 backdrop-blur-xl lg:block"><SidebarContent /></aside>;
 }
 
 export function SidebarHint() {
