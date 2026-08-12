@@ -1,16 +1,20 @@
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth, authDatabase } from "@/lib/auth";
-import { getBillingState, isBillingConfigured, isPaidPlan, planIdFor, razorpayRequest } from "@/lib/billing";
+import { BILLING_PLANS, billingConfigurationIssues, describeRazorpayError, getBillingState, isBillingConfigured, isPaidPlan, planIdFor, RazorpayApiError, razorpayKeyId, razorpayRequest } from "@/lib/billing";
 
 export const runtime = "nodejs";
 
-type RazorpaySubscription = { id: string; status: string };
+type RazorpaySubscription = { id: string; status: string; plan_id?: string };
+type RazorpayPlan = { id: string; interval: number; period: string; item?: { amount?: number; currency?: string } };
 
 export async function POST(request: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return NextResponse.json({ detail: "Sign in required" }, { status: 401 });
-  if (!isBillingConfigured()) return NextResponse.json({ detail: "Payments are not configured yet" }, { status: 503 });
+  if (!isBillingConfigured()) {
+    console.error("[AgentLens] Billing configuration is incomplete", { issues: billingConfigurationIssues() });
+    return NextResponse.json({ detail: "Payments need a valid Razorpay key pair and both Live or Test plan IDs in Vercel." }, { status: 503 });
+  }
 
   const payload = await request.json().catch(() => null) as { plan?: unknown } | null;
   if (!payload || !isPaidPlan(payload.plan)) return NextResponse.json({ detail: "Choose a valid plan" }, { status: 400 });
@@ -21,6 +25,21 @@ export async function POST(request: Request) {
   if (!planId) return NextResponse.json({ detail: "This plan is not available" }, { status: 503 });
 
   try {
+    const razorpayPlan = await razorpayRequest<RazorpayPlan>(`/plans/${encodeURIComponent(planId)}`);
+    const expectedAmount = BILLING_PLANS[payload.plan].priceInr * 100;
+    if (razorpayPlan.id !== planId || razorpayPlan.period !== "monthly" || razorpayPlan.interval !== 1 || razorpayPlan.item?.currency !== "INR" || razorpayPlan.item?.amount !== expectedAmount) {
+      console.error("[AgentLens] Razorpay plan does not match AgentLens pricing", {
+        plan: payload.plan,
+        planId,
+        period: razorpayPlan.period,
+        interval: razorpayPlan.interval,
+        currency: razorpayPlan.item?.currency,
+        amount: razorpayPlan.item?.amount,
+        expectedAmount,
+      });
+      return NextResponse.json({ detail: `The ${BILLING_PLANS[payload.plan].name} Razorpay plan must be monthly, in INR, and charge ₹${BILLING_PLANS[payload.plan].priceInr.toLocaleString("en-IN")}.` }, { status: 503 });
+    }
+
     const existing = await authDatabase.query<{ plan_code: string; status: string; razorpay_subscription_id: string }>(
       "SELECT plan_code, status, razorpay_subscription_id FROM billing_subscriptions WHERE account_id = $1",
       [session.user.id],
@@ -28,7 +47,19 @@ export async function POST(request: Request) {
     const pending = existing.rows[0];
     if (pending && ["created", "pending"].includes(pending.status)) {
       if (pending.plan_code !== payload.plan) return NextResponse.json({ detail: "Finish or cancel the checkout already started for your account" }, { status: 409 });
-      return NextResponse.json({ keyId: process.env.RAZORPAY_KEY_ID, subscriptionId: pending.razorpay_subscription_id, plan: payload.plan, customer: { name: session.user.name, email: session.user.email } });
+      try {
+        const remotePending = await razorpayRequest<RazorpaySubscription>(`/subscriptions/${encodeURIComponent(pending.razorpay_subscription_id)}`);
+        if (remotePending.plan_id === planId && ["created", "pending"].includes(remotePending.status)) {
+          return NextResponse.json({ keyId: razorpayKeyId(), subscriptionId: pending.razorpay_subscription_id, plan: payload.plan, customer: { name: session.user.name, email: session.user.email } });
+        }
+        if (remotePending.plan_id === planId && ["authenticated", "active"].includes(remotePending.status)) {
+          await authDatabase.query("UPDATE billing_subscriptions SET status = $1, updated_at = now() WHERE account_id = $2", [remotePending.status, session.user.id]);
+          return NextResponse.json({ detail: "Your previous payment is already active. Refresh the page to see your plan." }, { status: 409 });
+        }
+      } catch (pendingError) {
+        if (!(pendingError instanceof RazorpayApiError) || ![400, 404].includes(pendingError.status)) throw pendingError;
+        console.info("[AgentLens] Replacing a stale pending Razorpay subscription", { subscriptionId: pending.razorpay_subscription_id });
+      }
     }
     const subscription = await razorpayRequest<RazorpaySubscription>("/subscriptions", {
       method: "POST",
@@ -60,13 +91,15 @@ export async function POST(request: Request) {
       client.release();
     }
     return NextResponse.json({
-      keyId: process.env.RAZORPAY_KEY_ID,
+      keyId: razorpayKeyId(),
       subscriptionId: subscription.id,
       plan: payload.plan,
       customer: { name: session.user.name, email: session.user.email },
     });
   } catch (error) {
     console.error("[AgentLens] Could not create subscription", error);
-    return NextResponse.json({ detail: "We could not start checkout. Please try again." }, { status: 502 });
+    const databaseCode = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+    if (databaseCode === "42P01") return NextResponse.json({ detail: "Billing database setup is missing. Run the latest AgentLens database migration." }, { status: 503 });
+    return NextResponse.json({ detail: describeRazorpayError(error) }, { status: error instanceof RazorpayApiError && error.status < 500 ? 400 : 502 });
   }
 }

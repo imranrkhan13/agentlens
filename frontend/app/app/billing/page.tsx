@@ -33,7 +33,7 @@ export default async function BillingPage() {
         </article>;
       })}
     </section>
-    {!billing.configured && <section className="billing-config-note"><LockKeyhole className="size-5" /><div><b>Secure checkout is not enabled yet.</b><p>Add the Razorpay server settings before accepting payments. No key secret is ever sent to the browser.</p></div></section>}
+    {!billing.configured && <section className="billing-config-note"><LockKeyhole className="size-5" /><div><b>Secure checkout needs five Vercel settings.</b><p>Add RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET, RAZORPAY_PLAN_PRO_ID, RAZORPAY_PLAN_SCALE_ID, and RAZORPAY_WEBHOOK_SECRET. The two plans must be created in the same Live or Test mode as the key.</p></div></section>}
     <section className="billing-security"><div><ShieldCheck className="size-5" /><div><b>Payment details stay with Razorpay</b><p>AgentLens stores only subscription identifiers and status. Card numbers, UPI credentials and bank details never touch AgentLens.</p></div></div><div><CreditCard className="size-5" /><div><b>Every payment is verified</b><p>Access changes only after server-side signature and subscription verification.</p></div></div></section>
     {billing.plan !== "free" && !billing.cancelAtPeriodEnd && <CancelSubscriptionButton />}
   </div>;
