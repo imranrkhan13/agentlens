@@ -34,7 +34,7 @@ export default function DashboardPage() {
   const hasFailures = Boolean(data?.failed_calls);
   const health = !verified ? "setup" : loading ? "checking" : hasFailures ? "attention" : hasTraffic ? "healthy" : "waiting";
   const healthCopy = {
-    setup: { eyebrow: "ONE STEP LEFT", title: "Connect your first AI project.", body: "AgentLens is ready. Add one project so it can begin watching your AI.", action: "Create project", href: "/app/settings" },
+    setup: { eyebrow: "ONE STEP LEFT", title: "Connect your first AI app.", body: "AgentLens is ready. Add one app so it can begin watching your AI.", action: "Connect app", href: "/app/settings" },
     checking: { eyebrow: "CHECKING NOW", title: "Reading your latest AI activity…", body: "This usually takes only a moment.", action: "View projects", href: "/app/projects" },
     waiting: { eyebrow: "CONNECTED · WAITING", title: "Everything is ready for your first request.", body: "Use your AI feature normally. This page will update automatically when activity arrives.", action: "View setup", href: `/app/projects/${session?.projectId || ""}` },
     attention: { eyebrow: "NEEDS YOUR ATTENTION", title: `${formatNumber(data?.failed_calls)} AI ${data?.failed_calls === 1 ? "request needs" : "requests need"} a closer look.`, body: "Open activity to see which provider failed and what your team should check first.", action: "See what happened", href: "/app/events" },
@@ -44,19 +44,20 @@ export default function DashboardPage() {
   function refresh() { void Promise.all([stats.refetch(), events.refetch(), providers.refetch()]); }
 
   return <div className="space-y-8">
-    <PageHeader eyebrow="Your AI health" title="Here’s what matters right now." description={session ? `A clear view of ${session.projectName}, without infrastructure noise.` : "Set up one project and AgentLens will explain the rest."} action={<Button variant="secondary" size="sm" onClick={refresh} disabled={!verified || stats.isFetching}><RefreshCw className={`size-3.5 ${stats.isFetching ? "animate-spin" : ""}`} />Refresh</Button>} />
+    <PageHeader eyebrow="Home" title={session ? `Good to see you. Here’s ${session.projectName}.` : "Let’s connect your first AI app."} description="A simple view of what is working, what needs attention, and what to do next." action={<Button variant="secondary" size="sm" onClick={refresh} disabled={!verified || stats.isFetching}><RefreshCw className={`size-3.5 ${stats.isFetching ? "animate-spin" : ""}`} />Refresh</Button>} />
 
-    <section className={`dashboard-health dashboard-health-${health}`}>
-      <div className="dashboard-health-copy"><span>{healthCopy.eyebrow}</span><h2>{healthCopy.title}</h2><p>{healthCopy.body}</p><Button asChild variant="primary" size="sm"><Link href={healthCopy.href}>{healthCopy.action}<ArrowRight className="size-3.5" /></Link></Button></div>
-      <div className="dashboard-health-visual"><div className="health-radar"><i /><i /><i /><span>{health === "healthy" ? <Check className="size-7" /> : health === "attention" ? <TriangleAlert className="size-7" /> : <Activity className="size-7" />}</span></div><small>Live status</small></div>
+    <section className={`dashboard-health-card dashboard-health-${health}`}>
+      <div className="dashboard-health-icon">{health === "healthy" ? <Check className="size-6" /> : health === "attention" ? <TriangleAlert className="size-6" /> : <Activity className="size-6" />}</div>
+      <div className="dashboard-health-copy"><span>{healthCopy.eyebrow}</span><h2>{healthCopy.title}</h2><p>{healthCopy.body}</p></div>
+      <Button asChild variant="primary" size="sm"><Link href={healthCopy.href}>{healthCopy.action}<ArrowRight className="size-3.5" /></Link></Button>
     </section>
 
-    <section className="dashboard-match-banner"><div className="dashboard-match-orbit"><span>AI</span><i>01</i><i>02</i><i>03</i></div><div><span>NOT SURE WHICH AI TO USE?</span><h2>Describe the job. AgentLens will test the providers for you.</h2><p>Compare real quality, response time, reliability, and estimated cost using safe synthetic examples.</p></div><Button asChild><Link href="/app/match">Find my best provider <ArrowRight /></Link></Button></section>
+    <section className="dashboard-match-banner"><div className="dashboard-match-icon"><Sparkles /></div><div><span>NEED HELP CHOOSING AN AI?</span><h2>Tell us the job. We’ll compare the options.</h2><p>AgentLens tests quality, speed, reliability, and estimated cost with safe examples.</p></div><Button asChild variant="secondary"><Link href="/app/match">Compare AI providers <ArrowRight /></Link></Button></section>
 
     {!verified && <ConnectionCallout needsVerification={Boolean(session)} />}
     {requestError && <RequestDiagnosticsCard diagnostic={requestError.diagnostic} />}
 
-    <section className="dashboard-question"><div><Sparkles className="size-4" /><span>THE SIMPLE VERSION</span></div><p>{health === "attention" ? "Some requests could not finish. Start with Activity; the most recent failure is listed first." : health === "healthy" ? "Your AI is available, responding normally, and no failed requests are open right now." : health === "waiting" ? "The connection is ready. AgentLens is waiting for someone to use your AI feature." : "Create and connect one project. You do not need to configure providers by hand."}</p></section>
+    <section className="dashboard-question"><div><Sparkles className="size-4" /><span>THE SIMPLE VERSION</span></div><p>{health === "attention" ? "Some requests could not finish. Start with Activity; the most recent failure is listed first." : health === "healthy" ? "Your AI is available, responding normally, and no failed requests are open right now." : health === "waiting" ? "The connection is ready. AgentLens is waiting for someone to use your AI feature." : "Connect one app. You do not need to configure providers by hand."}</p></section>
 
     <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <MetricCard index={0} loading={loading} label="Conversations watched" helpText="The number of AI requests AgentLens observed." value={verified ? formatNumber(data?.total_calls) : "—"} subtext={hasTraffic ? "Real requests from your app" : "Waiting for the first request"} icon={Activity} />
