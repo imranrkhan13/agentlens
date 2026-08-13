@@ -28,6 +28,9 @@ const nextConfig: NextConfig = {
         { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
         { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
       ],
+    }, {
+      source: "/(app|api|login|signup|forgot-password|reset-password)/:path*",
+      headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" }],
     }];
   },
 };

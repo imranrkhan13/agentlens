@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -35,6 +36,7 @@ import {
   Webhook,
   Zap,
 } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
 
 const githubUrl = "https://github.com/imranrkhan13/agentlens";
 
@@ -78,12 +80,12 @@ function AnimatedHeadline() {
   const reduceMotion = useReducedMotion();
   const lines = [
     <span key="one">Choose the right AI.</span>,
-    <span key="two">Prove it <em>before launch.</em></span>,
-    <span key="three">Keep it healthy after.</span>,
+    <span key="two">Monitor it <em>in production.</em></span>,
+    <span key="three">Fix failures before users notice.</span>,
   ];
 
   return (
-    <h1 className="al-hero-title" aria-label="Choose the right AI. Prove it before launch. Keep it healthy after.">
+    <h1 className="al-hero-title" aria-label="Choose the right AI. Monitor it in production. Fix failures before users notice.">
       {lines.map((line, index) => (
         <span className="al-title-mask" key={index}>
           <motion.span
@@ -217,9 +219,9 @@ function PublicSite() {
   return <main className="al-page" ref={pageRef}>
     <motion.div className="al-scroll-progress" style={{ scaleX: progress }} />
     <div className="al-shell">
-      <header className="al-nav"><a href="#top" className="al-brand"><span><Radar size={18} /></span>AgentLens</a><nav><a href="#product">Product</a><a href="#workflow">How it works</a><a href="#comparison">Providers</a><a href="#pricing">Pricing</a></nav><div className="al-nav-actions"><a href={githubUrl} target="_blank" rel="noreferrer"><Github size={15} /> GitHub</a><button onClick={goSignup}>Find my provider <ArrowRight size={14} /></button></div></header>
+      <header className="al-nav"><a href="#top" className="al-brand"><BrandMark />AgentLens</a><nav><a href="#product">Product</a><Link href="/ai-observability">AI observability</Link><a href="#comparison">Providers</a><a href="#pricing">Pricing</a></nav><div className="al-nav-actions"><a href={githubUrl} target="_blank" rel="noreferrer"><Github size={15} /> GitHub</a><button onClick={goSignup}>Find my provider <ArrowRight size={14} /></button></div></header>
 
-      <section className="al-hero" id="top"><div className="al-hero-copy"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05, duration: 0.6 }}><Eyebrow>PROVIDER MATCH + PRODUCTION MONITORING</Eyebrow></motion.div><AnimatedHeadline /><motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.8, ease }}>Describe what your AI should do. AgentLens tests providers locally, explains the best fit, helps you connect it, and watches the choice in production.</motion.p><motion.div className="al-hero-actions" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.68, duration: 0.8, ease }}><MagneticButton onClick={goSignup}>Find my provider free</MagneticButton><a className="al-text-link" href={githubUrl} target="_blank" rel="noreferrer"><Github size={16} /> Explore the source <ArrowRight size={14} /></a></motion.div><motion.div className="al-trust" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.7 }}><span><CircleCheck size={14} /> Transparent scoring</span><span><LockKeyhole size={14} /> Provider keys stay local</span><span><Zap size={14} /> One-command tests</span></motion.div></div><HeroConsole /></section>
+      <section className="al-hero" id="top"><div className="al-hero-copy"><motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05, duration: 0.6 }}><Eyebrow>AI OBSERVABILITY + LLM MONITORING</Eyebrow></motion.div><AnimatedHeadline /><motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.8, ease }}>Compare AI providers before launch, then monitor OpenAI, Anthropic, Gemini, Groq and other LLMs in production. AgentLens explains reliability, latency, errors and cost without collecting your prompts.</motion.p><motion.div className="al-hero-actions" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.68, duration: 0.8, ease }}><MagneticButton onClick={goSignup}>Find my provider free</MagneticButton><a className="al-text-link" href={githubUrl} target="_blank" rel="noreferrer"><Github size={16} /> Explore the source <ArrowRight size={14} /></a></motion.div><motion.div className="al-trust" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9, duration: 0.7 }}><span><CircleCheck size={14} /> Transparent scoring</span><span><LockKeyhole size={14} /> Provider keys stay local</span><span><Zap size={14} /> One-command tests</span></motion.div></div><HeroConsole /></section>
 
       <Marquee />
       <section className="al-proof-strip"><Reveal><strong>7</strong><span>supported provider paths</span></Reveal><Reveal delay={0.08}><strong>3</strong><span>visible synthetic checks</span></Reveal><Reveal delay={0.16}><strong>1</strong><span>local runner command</span></Reveal><Reveal delay={0.24}><strong>0</strong><span>raw responses uploaded</span></Reveal></section>
@@ -242,7 +244,7 @@ function PublicSite() {
 
       <section className="al-final-cta"><motion.div className="al-cta-orbit" animate={{ rotate: 360 }} transition={{ duration: 32, repeat: Infinity, ease: "linear" }} /><Reveal><Eyebrow>SEE IT BEFORE THEY DO</Eyebrow><h2>Your next AI incident<br />already has an answer.</h2><p>Start monitoring real production behavior in minutes.</p></Reveal><Reveal className="al-final-actions" delay={0.1}><MagneticButton onClick={goSignup}>Start monitoring free</MagneticButton><a href={githubUrl} target="_blank" rel="noreferrer">View source <ArrowRight size={14} /></a></Reveal></section>
 
-      <footer className="al-footer"><div><a href="#top" className="al-brand"><span><Radar size={18} /></span>AgentLens</a><p>Reliability infrastructure for production AI applications.</p></div><div><span>PRODUCT</span><a href="#product">Incidents</a><a href="#comparison">Providers</a><a href="#pricing">Pricing</a></div><div><span>DEVELOPERS</span><a href={githubUrl}>GitHub</a><a href={githubUrl}>Documentation</a><a href={githubUrl}>Self-hosting</a></div><small>© {new Date().getFullYear()} AgentLens</small></footer>
+      <footer className="al-footer"><div><a href="#top" className="al-brand"><BrandMark />AgentLens</a><p>AI observability and LLM monitoring for production applications.</p></div><div><span>PRODUCT</span><a href="#product">Incidents</a><Link href="/ai-observability">AI observability</Link><a href="#comparison">Providers</a><a href="#pricing">Pricing</a></div><div><span>DEVELOPERS</span><a href={githubUrl}>GitHub</a><a href={githubUrl}>Documentation</a><a href={githubUrl}>Self-hosting</a></div><small>© {new Date().getFullYear()} AgentLens</small></footer>
     </div>
   </main>;
 }

@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Radar, Github } from "lucide-react";
+import { Github } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/landing/ui/button";
+import { BrandMark } from "@/components/brand-mark";
 
 const LINKS = ["Product", "How it works", "Pricing", "Docs"];
 
@@ -19,7 +20,7 @@ export function Navbar() {
     >
       <div className="glass mx-auto flex max-w-5xl items-center justify-between rounded-full px-5 py-2.5">
         <div className="flex items-center gap-2 text-[14px] font-semibold text-ink">
-          <Radar size={16} className="text-accent" />
+          <BrandMark className="size-7" />
           AgentLens
         </div>
         <nav className="hidden items-center gap-6 sm:flex">

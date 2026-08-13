@@ -1,5 +1,6 @@
-import { Activity, ArrowLeft, CircleAlert, CircleCheck, GitBranch, Radar, ShieldCheck } from "lucide-react";
+import { Activity, ArrowLeft, CircleAlert, CircleCheck, GitBranch, ShieldCheck } from "lucide-react";
 import { marketingUrl } from "@/lib/marketing-url";
+import { BrandMark } from "@/components/brand-mark";
 
 export function AuthShell({
   eyebrow,
@@ -17,7 +18,7 @@ export function AuthShell({
       <div className="auth-shell">
         <aside className="auth-story" aria-label="AgentLens reliability preview">
           <a href={marketingUrl} className="auth-brand" aria-label="Back to AgentLens">
-            <span><Radar size={18} /></span>AgentLens
+            <BrandMark />AgentLens
           </a>
           <div className="auth-story-copy">
             <span className="auth-eyebrow"><i /> RELIABILITY FOR PRODUCTION AI</span>
@@ -37,7 +38,7 @@ export function AuthShell({
         </aside>
 
         <section className="auth-form-panel">
-          <a href={marketingUrl} className="auth-mobile-brand" aria-label="Back to AgentLens"><span><Radar size={17} /></span>AgentLens</a>
+          <a href={marketingUrl} className="auth-mobile-brand" aria-label="Back to AgentLens"><BrandMark />AgentLens</a>
           <div className="auth-form-wrap">
             <span className="auth-eyebrow"><i /> {eyebrow.toUpperCase()}</span>
             <h1>{title}</h1>
