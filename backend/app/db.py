@@ -7,15 +7,35 @@ changes are owned by Alembic and are applied before the web process starts.
 from __future__ import annotations
 
 import os
+import ipaddress
+import socket
 from collections.abc import Generator
 
 from sqlalchemy import create_engine, text
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Engine, make_url
 from sqlalchemy.orm import Session, sessionmaker
 
 
 _engine: Engine | None = None
 _session_factory: sessionmaker[Session] | None = None
+
+
+def _postgres_url(value: str | None, variable: str) -> str:
+    if not value:
+        raise RuntimeError(
+            f"{variable} must be set (for example, "
+            "postgresql+psycopg://user:password@host:5432/agentlens)."
+        )
+    url = value.strip()
+    if url.startswith("postgres://"):
+        url = "postgresql+psycopg://" + url[len("postgres://"):]
+    elif url.startswith("postgresql://"):
+        # Managed providers commonly supply this generic SQLAlchemy URL. The
+        # image installs psycopg v3, so select it explicitly.
+        url = "postgresql+psycopg://" + url[len("postgresql://"):]
+    if not url.startswith("postgresql"):
+        raise RuntimeError(f"AgentLens only supports a PostgreSQL {variable}.")
+    return url
 
 
 def database_url() -> str:
@@ -24,21 +44,61 @@ def database_url() -> str:
     A deployment with no configured database must fail closed rather than
     quietly writing production telemetry to a local SQLite file.
     """
-    url = os.getenv("AGENTLENS_DATABASE_URL")
-    if not url:
+    return _postgres_url(os.getenv("AGENTLENS_DATABASE_URL"), "AGENTLENS_DATABASE_URL")
+
+
+def migration_database_url() -> str:
+    """Use a direct database endpoint for schema changes when available.
+
+    Neon recommends a direct connection for ORM migrations and a pooled
+    endpoint for normal application traffic. Existing deployments remain
+    compatible because the application URL is the fallback.
+    """
+    value = os.getenv("AGENTLENS_MIGRATION_DATABASE_URL")
+    return _postgres_url(value, "AGENTLENS_MIGRATION_DATABASE_URL") if value else database_url()
+
+
+def database_connect_args(url: str | None = None) -> dict[str, object]:
+    """Return bounded connection settings and prefer IPv4 when DNS permits.
+
+    Some container networks resolve a managed Postgres endpoint to IPv6 even
+    though the runtime has no IPv6 route. Supplying both ``host`` (in the URL)
+    and ``hostaddr`` keeps TLS hostname verification intact while making the
+    actual socket use a reachable IPv4 address.
+    """
+    resolved_url = url or database_url()
+    parsed = make_url(resolved_url)
+    host = parsed.host
+    args: dict[str, object] = {"connect_timeout": 10}
+    if not host or parsed.query.get("hostaddr"):
+        return args
+
+    try:
+        address = ipaddress.ip_address(host)
+        if address.version == 6:
+            raise RuntimeError(
+                "The configured PostgreSQL host is an IPv6 address, but this deployment requires an IPv4-capable database endpoint. "
+                "Copy the pooled or direct hostname from the Neon Connect dialog instead of an IPv6 literal."
+            )
+        return args
+    except ValueError:
+        pass
+
+    try:
+        ipv4_addresses = sorted({
+            entry[4][0]
+            for entry in socket.getaddrinfo(host, parsed.port or 5432, socket.AF_INET, socket.SOCK_STREAM)
+        })
+    except socket.gaierror as error:
         raise RuntimeError(
-            "AGENTLENS_DATABASE_URL must be set (for example, "
-            "postgresql+psycopg://user:password@host:5432/agentlens)."
+            f"The PostgreSQL hostname {host!r} could not be resolved to IPv4. Check AGENTLENS_DATABASE_URL in Render."
+        ) from error
+    if not ipv4_addresses:
+        raise RuntimeError(
+            f"The PostgreSQL hostname {host!r} has no IPv4 address. Use Neon's pooled IPv4-capable connection string or a Render Postgres internal URL."
         )
-    if url.startswith("postgres://"):
-        url = "postgresql+psycopg://" + url[len("postgres://"):]
-    elif url.startswith("postgresql://"):
-        # Managed providers commonly supply this generic SQLAlchemy URL. The
-        # image installs psycopg v3, so select it explicitly.
-        url = "postgresql+psycopg://" + url[len("postgresql://"):]
-    if not url.startswith("postgresql"):
-        raise RuntimeError("AgentLens only supports a PostgreSQL AGENTLENS_DATABASE_URL.")
-    return url
+    args["hostaddr"] = ipv4_addresses[0]
+    return args
 
 
 def get_engine() -> Engine:
@@ -53,6 +113,7 @@ def get_engine() -> Engine:
             max_overflow=max_overflow,
             pool_pre_ping=True,
             pool_recycle=1800,
+            connect_args=database_connect_args(),
             future=True,
         )
         _session_factory = sessionmaker(bind=_engine, autoflush=False, expire_on_commit=False)

@@ -59,6 +59,22 @@ If this does not work, open the API **Logs** tab. The most common cause is a
 database that is still starting; Render automatically retries the database
 migration while it becomes ready.
 
+### Using Neon instead of Render Postgres
+
+In the Neon **Connect** dialog, copy both connection strings for the same
+branch, database, and role:
+
+- Set `AGENTLENS_DATABASE_URL` on `agentlens-api` to the **pooled** connection
+  string (its hostname contains `-pooler`).
+- Set `AGENTLENS_MIGRATION_DATABASE_URL` to the **direct** connection string
+  (the same endpoint without `-pooler`).
+- Keep `sslmode=require&channel_binding=require` on both URLs.
+
+The API resolves managed database hostnames to IPv4 before connecting because
+some Render runtimes cannot route outbound IPv6. If startup says the hostname
+has no IPv4 address, recopy the current hostname from Neon instead of using an
+IPv6 literal or an old connection string.
+
 ## 3. Connect the real website address
 
 1. Open the `agentlens-web` service and click its public URL.
