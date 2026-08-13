@@ -101,31 +101,55 @@ export function isPaidPlan(value: unknown): value is PaidPlanCode {
   return value === "pro" || value === "scale";
 }
 
-export async function getBillingState(accountId: string): Promise<BillingState> {
-  const result = await authDatabase.query<{
+type BillingStateOptions = { projectCount?: number };
+
+function isMissingRelation(error: unknown) {
+  return Boolean(error && typeof error === "object" && "code" in error && error.code === "42P01");
+}
+
+export async function getBillingState(accountId: string, options: BillingStateOptions = {}): Promise<BillingState> {
+  let row: {
     plan_code: PlanCode;
     status: string;
     razorpay_subscription_id: string | null;
     current_period_end: Date | null;
     cancel_at_period_end: boolean;
-  }>(
-    `SELECT plan_code, status, razorpay_subscription_id, current_period_end, cancel_at_period_end
-       FROM billing_subscriptions WHERE account_id = $1 LIMIT 1`,
-    [accountId],
-  );
-  const row = result.rows[0];
+  } | undefined;
+  try {
+    const result = await authDatabase.query<NonNullable<typeof row>>(
+      `SELECT plan_code, status, razorpay_subscription_id, current_period_end, cancel_at_period_end
+         FROM billing_subscriptions WHERE account_id = $1 LIMIT 1`,
+      [accountId],
+    );
+    row = result.rows[0];
+  } catch (error) {
+    // Billing is optional for the free tier. A fresh auth database must never
+    // prevent somebody from creating and connecting their first project.
+    if (!isMissingRelation(error)) throw error;
+  }
   const paid = row && ACTIVE_STATUSES.has(row.status) && (row.plan_code === "pro" || row.plan_code === "scale");
-  const plan: PlanCode = paid ? row.plan_code : "free";
-  const projectResult = await authDatabase.query<{ count: string }>(
-    "SELECT COUNT(*)::text AS count FROM projects WHERE owner_account_id = $1",
-    [accountId],
-  );
+  const plan: PlanCode = paid && row ? row.plan_code : "free";
+  let projectCount = options.projectCount;
+  if (projectCount === undefined) {
+    try {
+      const projectResult = await authDatabase.query<{ count: string }>(
+        "SELECT COUNT(*)::text AS count FROM projects WHERE owner_account_id = $1",
+        [accountId],
+      );
+      projectCount = Number(projectResult.rows[0]?.count || 0);
+    } catch (error) {
+      // Vercel and the telemetry API may intentionally use separate databases.
+      // Callers at the API boundary pass the authoritative backend count.
+      if (!isMissingRelation(error)) throw error;
+      projectCount = 0;
+    }
+  }
   return {
     plan,
     planName: BILLING_PLANS[plan].name,
     status: row?.status || "free",
     projectLimit: BILLING_PLANS[plan].projectLimit,
-    projectCount: Number(projectResult.rows[0]?.count || 0),
+    projectCount,
     subscriptionId: row?.razorpay_subscription_id || null,
     currentPeriodEnd: row?.current_period_end?.toISOString() || null,
     cancelAtPeriodEnd: row?.cancel_at_period_end || false,

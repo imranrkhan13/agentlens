@@ -94,6 +94,32 @@ def test_structured_log_has_request_and_project_ids_but_never_the_raw_key(client
     assert project["api_key"] not in message
 
 
+def test_first_account_context_load_is_atomic_under_concurrency():
+    """A first dashboard render issues several account-context reads at once."""
+    account_id = "concurrent-first-login"
+    headers = {
+        "x-agentlens-account-id": account_id,
+        "x-agentlens-internal-token": "test-only-internal-token-not-for-production",
+    }
+
+    def load_context(_: int) -> int:
+        with TestClient(app) as worker_client:
+            response = worker_client.get("/v1/account/projects", headers=headers)
+            assert response.json() == {"projects": []}
+            return response.status_code
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        statuses = list(executor.map(load_context, range(8)))
+
+    assert statuses == [200] * 8
+    with get_engine().connect() as connection:
+        count = connection.execute(
+            text("SELECT COUNT(*) FROM accounts WHERE id = :account_id"),
+            {"account_id": account_id},
+        ).scalar_one()
+    assert count == 1
+
+
 def test_concurrent_pooled_writes_keep_each_projects_statistics_isolated():
     """Several TestClient threads use the real Postgres pool concurrently."""
     project_count = 8

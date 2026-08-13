@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime, timezone
 
 from sqlalchemy import case, func, select
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -33,9 +34,15 @@ def ensure_account(session: Session, account_id: str) -> None:
     account identity is accepted by FastAPI.
     """
 
-    if session.get(Account, account_id) is None:
-        session.add(Account(id=account_id))
-        session.commit()
+    # Multiple server components can load account context concurrently on the
+    # first page view. A SELECT followed by INSERT races under that workload;
+    # PostgreSQL's conflict handling makes lazy account creation atomic.
+    session.execute(
+        pg_insert(Account)
+        .values(id=account_id)
+        .on_conflict_do_nothing(index_elements=[Account.id])
+    )
+    session.commit()
 
 
 def create_project(

@@ -35,7 +35,11 @@ class Account(Base):
 
     __tablename__ = "accounts"
 
-    id: Mapped[str] = mapped_column(String(64), ForeignKey("auth_users.id", ondelete="CASCADE"), primary_key=True)
+    # The authenticated web application and telemetry API may be deployed
+    # against separate databases. The trusted internal API token establishes
+    # the account identity, so this row must not depend on a local auth_users
+    # row being present in the telemetry database.
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 

@@ -446,5 +446,22 @@ export async function saveRunnerResults(match: MatchRow, body: unknown) {
 export function sameOriginRequest(request: Request) {
   const origin = request.headers.get("origin");
   if (!origin) return process.env.NODE_ENV !== "production";
-  try { return new URL(origin).origin === new URL(request.url).origin; } catch { return false; }
+  try {
+    const requestOrigin = new URL(origin).origin;
+    const trusted = new Set<string>([new URL(request.url).origin]);
+    const configuredUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL;
+    if (configuredUrl) trusted.add(new URL(configuredUrl).origin);
+
+    // On Vercel, request.url can contain the internal function host. Trust the
+    // platform-provided public host as well as the explicitly configured app
+    // URL, while still requiring an exact scheme + host + port match.
+    const forwardedHost = request.headers.get("x-forwarded-host") || request.headers.get("host");
+    const forwardedProto = request.headers.get("x-forwarded-proto") || (forwardedHost?.startsWith("127.0.0.1") || forwardedHost?.startsWith("localhost") ? "http" : "https");
+    if (forwardedHost) trusted.add(new URL(`${forwardedProto}://${forwardedHost}`).origin);
+    if (process.env.VERCEL_URL) trusted.add(new URL(`https://${process.env.VERCEL_URL}`).origin);
+    if (process.env.VERCEL_PROJECT_PRODUCTION_URL) trusted.add(new URL(`https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`).origin);
+    return trusted.has(requestOrigin);
+  } catch {
+    return false;
+  }
 }

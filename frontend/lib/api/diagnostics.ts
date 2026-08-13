@@ -236,7 +236,14 @@ function detailsForStatus(status: number, url: string, method: string, body: str
   if (status >= 500) return {
     category: "server_error",
     title: `${status} Server Error`,
-    summary: "The backend failed while processing the request.",
+    summary: (() => {
+      try {
+        const parsed = JSON.parse(body || "{}") as { detail?: unknown };
+        return typeof parsed.detail === "string" ? parsed.detail : "The backend failed while processing the request.";
+      } catch {
+        return "The backend failed while processing the request.";
+      }
+    })(),
     suggestions: ["Check the backend logs using the request ID below, if present.", "Check database, provider, and deployment health.", "Review the response body or stack trace for the immediate cause."],
   };
   return {

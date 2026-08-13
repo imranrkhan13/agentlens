@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowRight, Check, Plus, ShieldCheck, WandSparkles } from "lucide-react";
+import { ArrowRight, Check, CircleHelp, Plus, ShieldCheck, WandSparkles } from "lucide-react";
 import { agentLensApi } from "@/lib/api/client";
 import { useAgentLensSession } from "@/hooks/use-agentlens-session";
 import { useProjectKeyReveal } from "@/components/workspace/project-key-reveal";
@@ -25,6 +25,9 @@ export default function SettingsPage() {
     onSuccess: async (project) => {
       storeProjectKey(project.project_id, project.api_key);
       await refresh();
+      // Notify the sidebar and top bar without reloading the document. The
+      // one-time key remains only in memory until the setup page consumes it.
+      window.dispatchEvent(new Event("agentlens:projects-updated"));
       router.push(`/app/projects/${project.project_id}`);
     },
     onError: (createError) => setError(isAgentLensApiError(createError) ? createError.diagnostic.summary : "We could not create your app. Please try again."),
@@ -66,7 +69,7 @@ export default function SettingsPage() {
           />
           <p className="onboarding-example">Examples: Support assistant, Resume writer, Sales helper</p>
 
-          {error && <p role="alert" className="onboarding-error">{error}</p>}
+          {error && <div role="alert" className="onboarding-error"><b>We could not create this app.</b><p>{error}</p><Link href="/app/diagnostics"><CircleHelp aria-hidden="true" />Open connection check</Link></div>}
 
           <Button type="submit" size="lg" variant="primary" disabled={createProject.isPending} className="mt-6 w-full sm:w-auto">
             {createProject.isPending ? "Creating your app…" : <><Plus className="size-4" aria-hidden="true" />Create app and continue</>}

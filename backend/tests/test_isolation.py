@@ -1,22 +1,12 @@
 """End-to-end proof that tenant statistics never cross project boundaries."""
 
-import re
 from uuid import uuid4
 
 from fastapi.testclient import TestClient
-from sqlalchemy import text
-
-from app.db import get_engine
 
 
 def make_project(client: TestClient, name: str, account_id: str | None = None) -> dict:
     account_id = account_id or f"test-account-{uuid4()}"
-    email_local = re.sub(r"[^a-z0-9]+", "-", account_id.lower()).strip("-")[:200]
-    with get_engine().begin() as connection:
-        connection.execute(
-            text("INSERT INTO auth_users (id, name, email, email_verified, recovery_email) VALUES (:id, :name, :email, true, :recovery_email)"),
-            {"id": account_id, "name": "Test account", "email": f"{email_local}@example.test", "recovery_email": f"{email_local}@recovery.example.test"},
-        )
     response = client.post(
         "/v1/account/projects",
         json={"name": name, "technology": "nextjs"},
