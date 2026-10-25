@@ -1,7 +1,7 @@
 /**
  * Zero-config server registration for supported fetch-based AI providers.
  *
- * Put `import "agentlens/register"` in the file that starts your Node server
+ * Put `import "agentrelay-sdk/register"` in the file that starts your Node server
  * after setting AGENTLENS_API_KEY. The default client then observes supported
  * provider fetch requests without changing those provider call sites.
  */
@@ -24,7 +24,7 @@ if (typeof window === "undefined") {
 
   if (!apiKey) {
     console.warn(
-      "[AgentLens] Automatic setup is waiting for AGENTLENS_API_KEY. Add the project key to your server environment, then restart your app.",
+      "[Agentrelay] Automatic setup is waiting for AGENTLENS_API_KEY. Add the project key to your server environment, then restart your app.",
     );
   } else {
     init({
@@ -33,4 +33,3 @@ if (typeof window === "undefined") {
     });
   }
 }
-
