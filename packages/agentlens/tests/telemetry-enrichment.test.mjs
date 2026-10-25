@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import agentlens from "agentlens";
+import agentlens from "agentrelay-sdk";
 
 const recordedEvents = [];
 const originalFetch = globalThis.fetch;
