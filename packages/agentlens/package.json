@@ -1,14 +1,14 @@
 {
-  "name": "agentlens",
+  "name": "agentrelay-sdk",
   "version": "0.2.0",
   "description": "Privacy-safe telemetry for AgentLens.",
-  "keywords": ["ai", "telemetry", "observability", "llm", "agentlens"],
+  "keywords": ["ai", "telemetry", "observability", "llm", "agentrelay"],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "agentlens": "./bin/agentlens.mjs"
+    "agentrelay": "./bin/agentlens.mjs"
   },
   "exports": {
     ".": {
