@@ -19,9 +19,9 @@ export type InstrumentationType = "native" | "generic";
 export interface AgentLensConfig {
   /** A project ingestion key. Keep it in a server-side environment variable. */
   apiKey: string;
-  /** AgentLens API root, without `/v1`. Defaults to http://localhost:8001. */
+  /** Agentrelay API root, without `/v1`. Defaults to http://localhost:8001. */
   endpoint?: string;
-  /** Maximum time to wait for the AgentLens ingestion API. Defaults to 5000 ms. */
+  /** Maximum time to wait for the Agentrelay ingestion API. Defaults to 5000 ms. */
   timeoutMs?: number;
   /**
    * Allow browser telemetry during local development. Never enable this in
@@ -58,7 +58,7 @@ export interface TelemetryEvent {
 export interface TelemetryDelivery {
   /** HTTP status returned by the ingestion API. */
   status: number;
-  /** AgentLens request ID, when the API returned one. */
+  /** Agentrelay request ID, when the API returned one. */
   requestId?: string;
 }
 
@@ -90,7 +90,7 @@ export class AgentLensHttpError extends AgentLensError {
       : " The server did not provide a response body.";
     const requestId = options.requestId ? ` Request ID: ${options.requestId}.` : "";
     super(
-      `AgentLens telemetry request failed: POST ${options.url} returned ${options.status} ${options.statusText}.${responseSummary}${requestId}`,
+      `Agentrelay telemetry request failed: POST ${options.url} returned ${options.status} ${options.statusText}.${responseSummary}${requestId}`,
     );
     this.name = "AgentLensHttpError";
     this.status = options.status;
@@ -140,25 +140,25 @@ function assertServerRuntime(allowBrowser = false, warnInBrowser = false): void 
   if (typeof window !== "undefined") {
     if (allowBrowser || isDevelopmentRuntime()) {
       if (warnInBrowser) {
-        console.warn("[AgentLens] Browser mode enabled. Do not use ingestion keys in production.");
+        console.warn("[Agentrelay] Browser mode enabled. Do not use ingestion keys in production.");
       }
     } else {
       throw new AgentLensError(
-        "AgentLens ingestion keys must only be used in server-side code, never in browser code.",
+        "Agentrelay ingestion keys must only be used in server-side code, never in browser code.",
       );
     }
   }
 
   if (typeof globalThis.fetch !== "function") {
     throw new AgentLensError(
-      "AgentLens requires a Fetch implementation. Use Node.js 18 or newer, or provide a compatible global fetch.",
+      "Agentrelay requires a Fetch implementation. Use Node.js 18 or newer, or provide a compatible global fetch.",
     );
   }
 }
 
 function readRequiredString(value: unknown, name: string): string {
   if (typeof value !== "string" || !value.trim()) {
-    throw new AgentLensError(`AgentLens ${name} must be a non-empty string.`);
+    throw new AgentLensError(`Agentrelay ${name} must be a non-empty string.`);
   }
   return value.trim();
 }
@@ -169,22 +169,22 @@ function normalizeEndpoint(value: string): string {
     parsed = new URL(value);
   } catch (cause) {
     throw new AgentLensError(
-      "AgentLens endpoint must be a valid absolute http or https URL, for example http://localhost:8001.",
+      "Agentrelay endpoint must be a valid absolute http or https URL, for example http://localhost:8001.",
       { cause },
     );
   }
 
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    throw new AgentLensError("AgentLens endpoint must use the http or https protocol.");
+    throw new AgentLensError("Agentrelay endpoint must use the http or https protocol.");
   }
   if (parsed.username || parsed.password || parsed.search || parsed.hash) {
-    throw new AgentLensError("AgentLens endpoint must be a plain API root URL without credentials, query parameters, or a hash.");
+    throw new AgentLensError("Agentrelay endpoint must be a plain API root URL without credentials, query parameters, or a hash.");
   }
 
   const pathname = parsed.pathname.replace(/\/+$/, "");
   if (pathname === "/v1" || pathname.endsWith("/v1")) {
     throw new AgentLensError(
-      "AgentLens endpoint must be the API root, not a /v1 URL. Use http://localhost:8001 instead of http://localhost:8001/v1.",
+      "Agentrelay endpoint must be the API root, not a /v1 URL. Use http://localhost:8001 instead of http://localhost:8001/v1.",
     );
   }
 
@@ -194,7 +194,7 @@ function normalizeEndpoint(value: string): string {
 
 function assertPositiveTimeout(value: unknown): number {
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
-    throw new AgentLensError("AgentLens timeoutMs must be a positive finite number.");
+    throw new AgentLensError("Agentrelay timeoutMs must be a positive finite number.");
   }
   return value;
 }
@@ -202,16 +202,16 @@ function assertPositiveTimeout(value: unknown): number {
 function readOptionalBoolean(value: unknown, name: string, defaultValue: boolean): boolean {
   if (value === undefined) return defaultValue;
   if (typeof value !== "boolean") {
-    throw new AgentLensError(`AgentLens ${name} must be a boolean when supplied.`);
+    throw new AgentLensError(`Agentrelay ${name} must be a boolean when supplied.`);
   }
   return value;
 }
 
-/** Configure the process-wide AgentLens telemetry client. */
+/** Configure the process-wide Agentrelay telemetry client. */
 export function init(config: AgentLensConfig): void {
   assertServerRuntime(config?.allowBrowser === true, true);
   if (!config || typeof config !== "object") {
-    throw new AgentLensError("AgentLens init requires a configuration object.");
+    throw new AgentLensError("Agentrelay init requires a configuration object.");
   }
 
   activeConfig = {
@@ -226,24 +226,24 @@ export function init(config: AgentLensConfig): void {
 
 function assertFiniteNumber(value: unknown, name: string, minimum = 0): asserts value is number {
   if (typeof value !== "number" || !Number.isFinite(value) || value < minimum) {
-    throw new AgentLensError(`AgentLens ${name} must be a finite number greater than or equal to ${minimum}.`);
+    throw new AgentLensError(`Agentrelay ${name} must be a finite number greater than or equal to ${minimum}.`);
   }
 }
 
 function assertOptionalInteger(value: unknown, name: string, minimum = 0): void {
   if (value !== undefined && (typeof value !== "number" || !Number.isInteger(value) || value < minimum)) {
-    throw new AgentLensError(`AgentLens ${name} must be an integer greater than or equal to ${minimum}.`);
+    throw new AgentLensError(`Agentrelay ${name} must be an integer greater than or equal to ${minimum}.`);
   }
 }
 
 function normalizeOptionalRequestUrl(value: unknown, name: string): string | undefined {
   if (value === undefined) return undefined;
   if (typeof value !== "string" || !value.trim()) {
-    throw new AgentLensError(`AgentLens ${name} must be a non-empty http or https URL when supplied.`);
+    throw new AgentLensError(`Agentrelay ${name} must be a non-empty http or https URL when supplied.`);
   }
   const sanitized = sanitizeRequestUrl(value.trim());
   if (!sanitized) {
-    throw new AgentLensError(`AgentLens ${name} must be a valid http or https URL when supplied.`);
+    throw new AgentLensError(`Agentrelay ${name} must be a valid http or https URL when supplied.`);
   }
   return sanitized;
 }
@@ -256,14 +256,14 @@ function normalizeOptionalEndpoint(value: unknown): string | undefined {
 function normalizeOptionalHttpMethod(value: unknown): string | undefined {
   if (value === undefined) return undefined;
   if (typeof value !== "string" || !/^[A-Za-z]+$/.test(value.trim())) {
-    throw new AgentLensError("AgentLens httpMethod must contain only HTTP method letters when supplied.");
+    throw new AgentLensError("Agentrelay httpMethod must contain only HTTP method letters when supplied.");
   }
   return value.trim().toUpperCase();
 }
 
 function buildPayload(event: TelemetryEvent): EventPayload {
   if (!event || typeof event !== "object") {
-    throw new AgentLensError("AgentLens track requires a telemetry event object.");
+    throw new AgentLensError("Agentrelay track requires a telemetry event object.");
   }
 
   const provider = readRequiredString(event.provider, "telemetry provider");
@@ -271,10 +271,10 @@ function buildPayload(event: TelemetryEvent): EventPayload {
   assertFiniteNumber(event.latencyMs, "latencyMs");
 
   if (typeof event.success !== "boolean") {
-    throw new AgentLensError("AgentLens success must be a boolean.");
+    throw new AgentLensError("Agentrelay success must be a boolean.");
   }
   if (event.statusCode !== undefined && (!Number.isInteger(event.statusCode) || event.statusCode < 100 || event.statusCode > 599)) {
-    throw new AgentLensError("AgentLens statusCode must be an integer between 100 and 599.");
+    throw new AgentLensError("Agentrelay statusCode must be an integer between 100 and 599.");
   }
   if (event.inputTokens !== undefined) assertOptionalInteger(event.inputTokens, "inputTokens");
   if (event.outputTokens !== undefined) assertOptionalInteger(event.outputTokens, "outputTokens");
@@ -282,10 +282,10 @@ function buildPayload(event: TelemetryEvent): EventPayload {
   if (event.estimatedCost !== undefined) assertFiniteNumber(event.estimatedCost, "estimatedCost");
 
   if (event.errorCategory !== undefined && (typeof event.errorCategory !== "string" || !event.errorCategory.trim())) {
-    throw new AgentLensError("AgentLens errorCategory must be a non-empty string when supplied.");
+    throw new AgentLensError("Agentrelay errorCategory must be a non-empty string when supplied.");
   }
   if (event.instrumentationType !== undefined && event.instrumentationType !== "native" && event.instrumentationType !== "generic") {
-    throw new AgentLensError("AgentLens instrumentationType must be either native or generic.");
+    throw new AgentLensError("Agentrelay instrumentationType must be either native or generic.");
   }
 
   const requestUrl = normalizeOptionalRequestUrl(event.requestUrl, "requestUrl");
@@ -340,10 +340,10 @@ async function readResponseUsage(response: Response) {
 function reportAutomaticTelemetry(event: TelemetryEvent, config: ActiveConfig): void {
   try {
     void deliver(buildPayload(event), config).catch((error: unknown) => {
-      console.warn("[AgentLens] Automatic telemetry delivery failed.", error);
+      console.warn("[Agentrelay] Automatic telemetry delivery failed.", error);
     });
   } catch (error) {
-    console.warn("[AgentLens] Automatic telemetry enrichment failed.", error);
+    console.warn("[Agentrelay] Automatic telemetry enrichment failed.", error);
   }
 }
 
@@ -381,7 +381,7 @@ function installFetchInstrumentation(): void {
           );
         })
         .catch((error: unknown) => {
-          console.warn("[AgentLens] Automatic telemetry enrichment failed.", error);
+          console.warn("[Agentrelay] Automatic telemetry enrichment failed.", error);
         });
       return response;
     } catch (error) {
@@ -409,7 +409,7 @@ function installFetchInstrumentation(): void {
   } catch (cause) {
     originalFetch = undefined;
     instrumentedFetch = undefined;
-    throw new AgentLensError("AgentLens could not install automatic fetch instrumentation in this runtime.", { cause });
+    throw new AgentLensError("Agentrelay could not install automatic fetch instrumentation in this runtime.", { cause });
   }
 }
 
@@ -438,9 +438,9 @@ async function deliver(payload: EventPayload, config: ActiveConfig): Promise<Tel
       });
     } catch (cause) {
       if (controller.signal.aborted) {
-        throw new AgentLensError(`AgentLens telemetry request timed out after ${config.timeoutMs} ms while posting to ${url}.`, { cause });
+        throw new AgentLensError(`Agentrelay telemetry request timed out after ${config.timeoutMs} ms while posting to ${url}.`, { cause });
       }
-      throw new AgentLensError(`AgentLens could not reach ${url}. Verify the endpoint and network connection.`, { cause });
+      throw new AgentLensError(`Agentrelay could not reach ${url}. Verify the endpoint and network connection.`, { cause });
     }
 
     const requestId = response.headers.get("x-request-id") ?? undefined;
