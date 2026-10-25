@@ -10,7 +10,7 @@ import { runProviderMatch } from "./provider-match.mjs";
 const frameworks = new Set(["nextjs", "node", "express", "fastapi", "django", "laravel", "python", "other"]);
 
 function fail(message) {
-  throw new Error(`[AgentLens] ${message}`);
+  throw new Error(`[Agentrelay] ${message}`);
 }
 
 function readJson(file) {
@@ -28,7 +28,7 @@ function parseArgs(values) {
       if (!next || next.startsWith("--")) fail(`${value} needs a value.`);
       options[value.slice(2).replace(/-([a-z])/g, (_, character) => character.toUpperCase())] = next;
       index += 1;
-    } else fail(`I do not recognise ${value}. Run \`npx agentlens init\`.`);
+    } else fail(`I do not recognise ${value}. Run \`npx agentrelay-sdk init\`.`);
   }
   return options;
 }
@@ -42,7 +42,7 @@ function parseMatchArgs(values) {
       if (!next || next.startsWith("--")) fail(`${value} needs a value.`);
       options[value.slice(2)] = next;
       index += 1;
-    } else fail(`I do not recognise ${value}. Run \`npx agentlens match --help\`.`);
+    } else fail(`I do not recognise ${value}. Run \`npx agentrelay-sdk match --help\`.`);
   }
   return options;
 }
@@ -64,10 +64,10 @@ function detectFramework(cwd) {
 }
 
 function packageManager(cwd) {
-  if (hasFile(cwd, "pnpm-lock.yaml")) return ["pnpm", ["add", "agentlens"]];
-  if (hasFile(cwd, "yarn.lock")) return ["yarn", ["add", "agentlens"]];
-  if (hasFile(cwd, "bun.lockb") || hasFile(cwd, "bun.lock")) return ["bun", ["add", "agentlens"]];
-  return ["npm", ["install", "agentlens"]];
+  if (hasFile(cwd, "pnpm-lock.yaml")) return ["pnpm", [["add", "agentrelay-sdk"]]];
+  if (hasFile(cwd, "yarn.lock")) return ["yarn", [["add", "agentrelay-sdk"]]];
+  if (hasFile(cwd, "bun.lockb") || hasFile(cwd, "bun.lock")) return ["bun", [["add", "agentrelay-sdk"]]];
+  return ["npm", [["install", "agentrelay-sdk"]]];
 }
 
 function installPackage(cwd, framework, skipInstall) {
@@ -116,17 +116,17 @@ function injectNextRegistration(cwd) {
   const existing = candidates.map((candidate) => join(cwd, candidate)).find(existsSync);
   const file = existing || join(cwd, "instrumentation.ts");
   const current = existsSync(file) ? readFileSync(file, "utf8") : "";
-  if (current.includes("agentlens/register")) return file;
+  if (current.includes("agentrelay-sdk/register")) return file;
   if (!current) {
-    writeFileSync(file, 'export async function register() {\n  await import("agentlens/register");\n}\n', "utf8");
+    writeFileSync(file, 'export async function register() {\n  await import("agentrelay-sdk/register");\n}\n', "utf8");
     return file;
   }
   const registerPattern = /(export\s+(?:async\s+)?function\s+register\s*\([^)]*\)\s*\{)/;
   if (registerPattern.test(current)) {
-    writeFileSync(file, current.replace(registerPattern, '$1\n  await import("agentlens/register");'), "utf8");
+    writeFileSync(file, current.replace(registerPattern, '$1\n  await import("agentrelay-sdk/register");'), "utf8");
     return file;
   }
-  writeFileSync(file, `import "agentlens/register";\n${current}`, "utf8");
+  writeFileSync(file, `import "agentrelay-sdk/register";\n${current}`, "utf8");
   return file;
 }
 
@@ -134,10 +134,10 @@ function injectNodeRegistration(cwd, framework, entryOption) {
   if (framework === "nextjs") return injectNextRegistration(cwd);
   const file = findNodeEntry(cwd, entryOption);
   const current = readFileSync(file, "utf8");
-  if (current.includes("agentlens/register")) return file;
+  if (current.includes("agentrelay-sdk/register")) return file;
   const packageJson = readJson(join(cwd, "package.json"));
   const commonJs = extname(file) === ".cjs" || (extname(file) === ".js" && packageJson?.type !== "module");
-  const statement = commonJs ? 'require("agentlens/register");' : 'import "agentlens/register";';
+  const statement = commonJs ? 'require("agentrelay-sdk/register");' : 'import "agentrelay-sdk/register";';
   writeFileSync(file, `${statement}\n${current}`, "utf8");
   return file;
 }
@@ -178,33 +178,33 @@ async function init() {
   const cwd = process.cwd();
   const framework = options.framework || detectFramework(cwd);
   if (!frameworks.has(framework)) fail("--framework must be nextjs, node, express, fastapi, django, laravel, python, or other.");
-  const apiKey = options.apiKey || process.env.AGENTLENS_API_KEY || await ask("Your private AgentLens project key: ", "", options);
-  if (!apiKey) fail("A project key is needed. Create a project in AgentLens, then run this command again with --api-key or AGENTLENS_API_KEY.");
-  const endpoint = options.endpoint || process.env.AGENTLENS_ENDPOINT || await ask("AgentLens address (press Enter for http://localhost:8001): ", "http://localhost:8001", options);
+  const apiKey = options.apiKey || process.env.AGENTLENS_API_KEY || await ask("Your private Agentrelay project key: ", "", options);
+  if (!apiKey) fail("A project key is needed. Create a project in Agentrelay, then run this command again with --api-key or AGENTLENS_API_KEY.");
+  const endpoint = options.endpoint || process.env.AGENTLENS_ENDPOINT || await ask("Agentrelay address (press Enter for http://localhost:8001): ", "http://localhost:8001", options);
 
-  console.log(`\n[AgentLens] Found ${framework === "nextjs" ? "a Next.js app" : `${framework} project`}.`);
+  console.log(`\n[Agentrelay] Found ${framework === "nextjs" ? "a Next.js app" : `${framework} project`}.`);
   installPackage(cwd, framework, options.skipInstall);
   const envFile = environmentFile(cwd, framework);
   ensureEnvironment(envFile, apiKey, endpoint);
   let entry = null;
   if (["nextjs", "node", "express"].includes(framework)) entry = injectNodeRegistration(cwd, framework, options.entry);
   else if (["fastapi", "django", "python"].includes(framework)) entry = injectPythonRegistration(cwd, framework, options.entry);
-  else console.log("[AgentLens] I saved your project key and config. This app type needs a supported server entry before automatic registration is possible.");
+  else console.log("[Agentrelay] I saved your project key and config. This app type needs a supported server entry before automatic registration is possible.");
   writeConfig(cwd, framework, endpoint, entry);
 
   const envSaved = readFileSync(envFile, "utf8").includes("AGENTLENS_API_KEY=");
-  const registered = entry ? readFileSync(entry, "utf8").includes("agentlens") : framework === "other" || framework === "laravel";
+  const registered = entry ? readFileSync(entry, "utf8").includes("agentrelay-sdk") : framework === "other" || framework === "laravel";
   if (!envSaved || !registered || !existsSync(join(cwd, "agentlens.config.json"))) fail("The installation check did not pass. No files were deleted; please run it again with --entry.");
-  console.log("[AgentLens] ✓ Installation verified.");
-  console.log("[AgentLens] Start your app, make one normal AI request, then return to AgentLens.");
+  console.log("[Agentrelay] ✓ Installation verified.");
+  console.log("[Agentrelay] Start your app, make one normal AI request, then return to Agentrelay.");
 }
 
 function printUsage() {
-  console.log("AgentLens\n\nSet up monitoring:  npx agentlens init\nCompare AI providers: npx agentlens match --code YOUR_ONE_TIME_CODE\n\nSetup options: --api-key, --endpoint, --framework, --entry, --yes\nMatch options: --code, --workspace");
+  console.log("Agentrelay\n\nSet up monitoring:  npx agentrelay-sdk init\nCompare AI providers: npx agentrelay-sdk match --code YOUR_ONE_TIME_CODE\n\nSetup options: --api-key, --endpoint, --framework, --entry, --yes\nMatch options: --code, --workspace");
 }
 
 const command = process.argv[2];
 if (!command || command === "--help" || command === "-h") printUsage();
 else if (command === "init") init().catch((error) => { console.error(error.message); process.exitCode = 1; });
-else if (command === "match") runProviderMatch(parseMatchArgs(process.argv.slice(3)), ask).catch((error) => { console.error(`[AgentLens] ${error.message}`); process.exitCode = 1; });
-else { console.error(`[AgentLens] Unknown command: ${command}`); printUsage(); process.exitCode = 1; }
+else if (command === "match") runProviderMatch(parseMatchArgs(process.argv.slice(3)), ask).catch((error) => { console.error(`[Agentrelay] ${error.message}`); process.exitCode = 1; });
+else { console.error(`[Agentrelay] Unknown command: ${command}`); printUsage(); process.exitCode = 1; }
