@@ -9,7 +9,7 @@ try {
   process.env.AGENTLENS_ENDPOINT = "http://agentlens.test";
   globalThis.fetch = async () => new Response("{}", { status: 200 });
 
-  await import("agentlens/register");
+  await import("agentrelay-sdk/register");
   assert.equal(typeof globalThis.fetch, "function");
   console.log("Automatic server registration passed.");
 } finally {
