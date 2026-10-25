@@ -67,7 +67,7 @@ estimated—numbers and the test configuration.
 
 The signed-in app includes a plain-language provider comparison workflow. It
 creates visible synthetic checks and runs them against the user's own provider
-accounts with `npx agentlens match`. Provider credentials and raw answers stay
+accounts with `npx agentrelay-sdk match`. Provider credentials and raw answers stay
 local; AgentLens stores only the private test plan and metadata-only scorecard.
 
 See [Provider Match](docs/PROVIDER_MATCH.md) for the security boundary,
