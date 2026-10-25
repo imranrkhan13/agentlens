@@ -171,27 +171,27 @@ async function workspaceRequest(workspace, code, options = {}) {
     headers: { Authorization: `Bearer ${code}`, "Content-Type": "application/json", ...(options.headers || {}) },
   });
   const payload = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(payload.detail || `AgentLens returned ${response.status}.`);
+  if (!response.ok) throw new Error(payload.detail || `Agentrelay returned ${response.status}.`);
   return payload;
 }
 
 export async function runProviderMatch(options, ask) {
   const workspace = (options.workspace || process.env.AGENTLENS_WEB_URL || DEFAULT_WORKSPACE).replace(/\/$/, "");
-  const code = options.code || process.env.AGENTLENS_MATCH_CODE || await ask("Paste the one-time comparison code from AgentLens: ", "", options);
-  if (!code) throw new Error("A one-time comparison code is required. Open Find my AI provider in AgentLens to create one.");
-  console.log("\n[AgentLens] Loading your private test plan…");
+  const code = options.code || process.env.AGENTLENS_MATCH_CODE || await ask("Paste the one-time comparison code from Agentrelay: ", "", options);
+  if (!code) throw new Error("A one-time comparison code is required. Open Find my AI provider in Agentrelay to create one.");
+  console.log("\n[Agentrelay] Loading your private test plan…");
   const specification = await workspaceRequest(workspace, code);
-  console.log(`[AgentLens] ${specification.name}`);
-  console.log(`[AgentLens] ${specification.testCases.length} synthetic checks × ${specification.providers.length} selected providers.`);
-  console.log("[AgentLens] Keys and model answers stay on this computer. Only scores and timing are uploaded.\n");
+  console.log(`[Agentrelay] ${specification.name}`);
+  console.log(`[Agentrelay] ${specification.testCases.length} synthetic checks × ${specification.providers.length} selected providers.`);
+  console.log("[Agentrelay] Keys and model answers stay on this computer. Only scores and timing are uploaded.\n");
   const results = [];
   for (const provider of specification.providers) {
-    console.log(`[AgentLens] Testing ${provider.name} · ${provider.model}`);
+    console.log(`[Agentrelay] Testing ${provider.name} · ${provider.model}`);
     results.push(await testProvider(provider, specification));
   }
-  console.log("\n[AgentLens] Sending the metadata-only scorecard…");
+  console.log("\n[Agentrelay] Sending the metadata-only scorecard…");
   const saved = await workspaceRequest(workspace, code, { method: "POST", body: JSON.stringify({ results }) });
-  if (saved.recommendation) console.log(`[AgentLens] ✓ Best fit: ${saved.recommendation.provider} · ${saved.recommendation.model} (${saved.recommendation.score}/100)`);
-  else console.log("[AgentLens] The run finished, but no provider completed enough checks for a recommendation.");
-  console.log(`[AgentLens] Open ${workspace}/app/match/${specification.id} for the full explanation.`);
+  if (saved.recommendation) console.log(`[Agentrelay] ✓ Best fit: ${saved.recommendation.provider} · ${saved.recommendation.model} (${saved.recommendation.score}/100)`);
+  else console.log("[Agentrelay] The run finished, but no provider completed enough checks for a recommendation.");
+  console.log(`[Agentrelay] Open ${workspace}/app/match/${specification.id} for the full explanation.`);
 }
