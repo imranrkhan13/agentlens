@@ -14,7 +14,7 @@ try {
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, /Installation verified/);
   assert.match(readFileSync(join(fixture, ".env.local"), "utf8"), /AGENTLENS_API_KEY=al_test_key/);
-  assert.match(readFileSync(join(fixture, "instrumentation.ts"), "utf8"), /agentlens\/register/);
+  assert.match(readFileSync(join(fixture, "instrumentation.ts"), "utf8"), /agentrelay-sdk\/register/);
   const config = JSON.parse(readFileSync(join(fixture, "agentlens.config.json"), "utf8"));
   assert.equal(config.framework, "nextjs");
   assert.equal(config.endpoint, "http://agentlens.test");
